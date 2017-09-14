@@ -20,6 +20,12 @@
   version = "v1.10.44"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/crewjam/go-cloudformation"
+  packages = ["."]
+  revision = "d3183a4759da92da1e846521444ad08216b7f20e"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -110,6 +116,12 @@
   version = "v1.1"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/spf13/cobra"
   packages = ["."]
@@ -120,6 +132,12 @@
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert","require"]
+  revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
+  version = "v1.1.4"
 
 [[projects]]
   branch = "master"
@@ -160,6 +178,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "169e2f82362fedf65408afcae07e809064d8f4a91e70de50cd23c2f58f9d0273"
+  inputs-digest = "a0f309f34b644dd56bdedcdd4bb045eaf3e30bf4cf9bcf736c753c8ba0b2b2cc"
   solver-name = "gps-cdcl"
   solver-version = 1

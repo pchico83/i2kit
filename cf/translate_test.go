@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateCloudFormationTemplate(t *testing.T) {
-	deploymentBytes, err := ioutil.ReadFile("/Users/alberto/go/src/github.com/pchico83/i2kit/test/k8s-example")
+	deploymentBytes, err := ioutil.ReadFile("../test/k8s-example")
 	if err != nil {
 		t.Fatalf("Error read file: %s", err)
 	}
