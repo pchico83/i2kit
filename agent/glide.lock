@@ -1,0 +1,15 @@
+hash: 6c1e18a79330477b9b9ad1635e10b072b367ef0e4606893e65eef6d0d8d90366
+updated: 2017-12-09T17:52:39.433714927-08:00
+imports:
+- name: github.com/sirupsen/logrus
+  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+- name: golang.org/x/crypto
+  version: 94eea52f7b742c7cbe0b03b22f0c4c8631ece122
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: b8f5ef32195cae6470b728e8ca677f0dbed1a004
+  subpackages:
+  - unix
+  - windows
+testImports: []

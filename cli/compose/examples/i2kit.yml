@@ -1,0 +1,10 @@
+name: test
+replicas: 2
+containers:
+  nginx:
+    image: nginx:alpine
+    environment:
+      - NAME=VALUE
+    ports:
+      - https:443:http:80:certificate:id
+    command: start.sh

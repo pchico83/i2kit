@@ -1,0 +1,7 @@
+name: test
+replicas: 2
+containers:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - http:80:http:80

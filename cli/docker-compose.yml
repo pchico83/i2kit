@@ -1,0 +1,22 @@
+version: "3"
+services:
+  cli:
+    image: riberaproject/cli
+    build: .
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - I2KIT_REGION=us-west-2
+      - I2KIT_HOSTED_ZONE
+      - I2KIT_SECURITY_GROUP
+      - I2KIT_SUBNET
+      - I2KIT_KEYPAIR
+      - I2KIT_INSTANCE_TYPE
+    volumes:
+      - ./i2kit.yml:/root/i2kit/i2kit.yml
+  test:
+    image: golang:1.9.0-alpine3.6
+    working_dir: /go/src/bitbucket.org/riberaproject/cli
+    volumes:
+      - .:/go/src/bitbucket.org/riberaproject/cli
+    command: go test ./...

@@ -1,0 +1,13 @@
+version: "3"
+services:
+  amis:
+    image: i2kit/amis
+    build: .
+    environment:
+      - AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws-credentials
+      - AWS_REGIONS=us-west-2
+    volumes:
+      - $PWD:/root/i2kit
+      - $PWD/aws-credentials:/run/secrets/aws-credentials
+      - ~/.docker/config.json:/root/.docker/config.json
+      - /var/run/docker.sock:/var/run/docker.sock

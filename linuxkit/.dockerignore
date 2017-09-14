@@ -1,0 +1,6 @@
+.git*
+.dockerignore
+
+Dockerfile
+docker-compose.yml
+aws-credentials

@@ -1,0 +1,88 @@
+hash: e05e76dceac9f722635d02d5c7a7e1db34c034ecb9cda3612f78dacb7e006f70
+updated: 2018-01-08T21:11:09.673335409+01:00
+imports:
+- name: github.com/aws/aws-sdk-go
+  version: 3d07f149a788d58122fafcaa911d407168169ce0
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/shareddefaults
+  - private/protocol
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - service/cloudformation
+  - service/elb
+  - service/sts
+- name: github.com/crewjam/go-cloudformation
+  version: d3183a4759da92da1e846521444ad08216b7f20e
+- name: github.com/go-ini/ini
+  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
+- name: github.com/google/uuid
+  version: dec09d789f3dba190787f8b4454c7d3c936fed9e
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jmespath/go-jmespath
+  version: dd801d4f4ce7ac746e7e7b4489d2fa600b3b096b
+- name: github.com/moby/tool
+  version: 1aca4eefa5fcfb2248e6b2e4ce7251a9a3b5a60a
+  subpackages:
+  - src/moby
+- name: github.com/Sirupsen/logrus
+  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+  repo: git@github.com:/sirupsen/logrus
+  vcs: git
+- name: github.com/sirupsen/logrus
+  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+- name: github.com/spf13/cobra
+  version: b95ab734e27d33e0d8fbabf71ca990568d4e2020
+- name: github.com/spf13/pflag
+  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
+- name: golang.org/x/crypto
+  version: 94eea52f7b742c7cbe0b03b22f0c4c8631ece122
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: b8f5ef32195cae6470b728e8ca677f0dbed1a004
+  subpackages:
+  - unix
+  - windows
+- name: gopkg.in/yaml.v2
+  version: 1244d3ce02e3e1c16820ada0bae506b6c479f106
+- name: k8s.io/api
+  version: 57d7f151236665c12202a51c21bc939eb5d5ba91
+  subpackages:
+  - extensions/v1beta1
+- name: k8s.io/apimachinery
+  version: e9a29eff7d472df0f7da9ead5ab59b74e74a07ec
+  subpackages:
+  - pkg/util/yaml
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
+  subpackages:
+  - assert
+  - require

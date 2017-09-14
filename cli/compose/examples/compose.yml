@@ -1,0 +1,12 @@
+version: "3.4"
+services:
+  nginx:
+    image: nginx:alpine
+    command: start.sh
+    ports:
+    - 80:80
+    environment:
+    - NAME=VALUE
+    network_mode: bridge
+    dns_search:
+    - staging.i2kit.com

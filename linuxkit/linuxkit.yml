@@ -1,0 +1,59 @@
+kernel:
+  image: linuxkit/kernel:4.9.67
+  cmdline: "console=tty0 console=ttyS0 console=ttyAMA0"
+init:
+  - linuxkit/init:9250948d0de494df8a811edb3242b4584057cfe4
+  - linuxkit/runc:abc3f292653e64a2fd488e9675ace19a55ec7023
+  - linuxkit/containerd:e58a382c33bb509ba3e0e8170dfaa5a100504c5b
+  - linuxkit/ca-certificates:de21b84d9b055ad9dcecc57965b654a7a24ef8e0
+onboot:
+  - name: sysctl
+    image: linuxkit/sysctl:ce3bde5118a41092f1b7048c85d14fb35237ed45
+  - name: dhcpcd
+    image: linuxkit/dhcpcd:0d59a6cc03412289ef4313f2491ec666c1715cc9
+    command: ["/sbin/dhcpcd", "--nobackground", "-f", "/dhcpcd.conf", "-1"]
+  - name: metadata
+    image: linuxkit/metadata:2af15c9f4b0e73515c219b7cc14e6e65e1d4fd6d
+  - name: sysfs
+    image: linuxkit/sysfs:1284b4a7061a5cc426425f0fb00748192505a05f
+  - name: format
+    image: linuxkit/format:e945016ec780a788a71dcddc81497d54d3b14bc7
+  - name: mount
+    image: linuxkit/mount:b346ec277b7074e5c9986128a879c10a1d18742b
+    command: ["/usr/bin/mountie", "/var/lib/docker"]
+services:
+  - name: getty
+    image: linuxkit/getty:22e27189b6b354e1d5d38fc0536a5af3f2adb79f
+    env:
+     - INSECURE=true
+  - name: rngd
+    image: linuxkit/rngd:94e01a4b16fadb053455cdc2269c4eb0b39199cd
+  - name: sshd
+    image: linuxkit/sshd:ac5e8364e2e9aa8717a3295c51eb60b8c57373d5
+    binds:
+     - /var/config/ssh/authorized_keys:/root/.ssh/authorized_keys
+  - name: ntpd
+    image: linuxkit/openntpd:536e5947607c9e6a6771957c2ff817230cba0d3c
+  - name: docker
+    image: docker:17.07.0-ce-dind
+    capabilities:
+     - all
+    net: host
+    mounts:
+     - type: cgroup
+       options: ["rw","nosuid","noexec","nodev","relatime"]
+    binds:
+     - /etc/resolv.conf:/etc/resolv.conf
+     - /var/lib/docker:/var/lib/docker
+     - /lib/modules:/lib/modules
+     - /etc/docker/daemon.json:/etc/docker/daemon.json
+    command: ["/usr/local/bin/docker-init", "/usr/local/bin/dockerd"]
+files:
+  - path: var/lib/docker
+    directory: true
+  - path: etc/docker/daemon.json
+    contents: '{"debug": true}'
+trust:
+  org:
+    - linuxkit
+    - library
