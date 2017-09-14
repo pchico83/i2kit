@@ -6,9 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/pchico83/i2kit/cf"
 	"github.com/spf13/cobra"
-	"github.com/pchico83/i2kit/deploy"
-	"github.com/pchico83/i2kit/destroy"
 )
 
 func main() {
@@ -32,8 +31,8 @@ func main() {
 	name := "test"
 	i2kitPath := "./example.yml"
 	cmd.AddCommand(
-		deploy.NewDeploy(name, i2kitPath, awsConfig),
-		destroy.NewDestroy(name, awsConfig),
+		cf.NewDeploy(name, i2kitPath, awsConfig),
+		cf.NewDestroy(name, awsConfig),
 	)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

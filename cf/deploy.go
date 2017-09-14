@@ -1,4 +1,4 @@
-package deploy
+package cf
 
 import (
 	"io/ioutil"
@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/pchico83/i2kit/cf"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +36,7 @@ func NewDeploy(name, i2kitPath string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return cf.Watch(svc, stack.StackId, cloudformation.ResourceStatusCreateInProgress, 0)
+			return Watch(svc, stack.StackId, cloudformation.ResourceStatusCreateInProgress, 0)
 		},
 	}
 	return cmd

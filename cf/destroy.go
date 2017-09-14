@@ -1,4 +1,4 @@
-package destroy
+package cf
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	"github.com/pchico83/i2kit/cf"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +46,7 @@ func NewDestroy(name string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return cf.Watch(svc, stackID, cloudformation.ResourceStatusDeleteInProgress, consumed)
+			return Watch(svc, stackID, cloudformation.ResourceStatusDeleteInProgress, consumed)
 		},
 	}
 	return cmd
