@@ -13,7 +13,7 @@ import (
 func NewDestroy(name string, awsConfig *aws.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "destroy",
-		Short: "Destroy a i2kit application",
+		Short: "Destroy a k8 object",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			svc := cloudformation.New(session.New(), awsConfig)
 			response, err := svc.DescribeStacks(

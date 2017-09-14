@@ -29,9 +29,9 @@ func main() {
 		Credentials: credentials.NewSharedCredentials(awsCredentials, "default"),
 	}
 	name := "test"
-	i2kitPath := "./example.yml"
+	k8Path := "./example.yml"
 	cmd.AddCommand(
-		cf.NewDeploy(name, i2kitPath, awsConfig),
+		cf.NewDeploy(name, k8Path, awsConfig),
 		cf.NewDestroy(name, awsConfig),
 	)
 	if err := cmd.Execute(); err != nil {

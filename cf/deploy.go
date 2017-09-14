@@ -7,14 +7,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/pkg/api"
 )
 
-//NewDeploy deploys a i2kit application
-func NewDeploy(name, i2kitPath string, awsConfig *aws.Config) *cobra.Command {
+//NewDeploy deploys a k8 object
+func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
-		Short: "Deploy a i2kit application",
+		Short: "Deploy a k8 object",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			deploymentBytes, err := ioutil.ReadFile(k8Path)
+			if err != nil {
+				return err
+			}
+			decode := api.Codecs.UniversalDeserializer().Decode
+			_, _, err = decode(deploymentBytes, nil, nil)
+			if err != nil {
+				return err
+			}
 			svc := cloudformation.New(session.New(), awsConfig)
 			bytes, err := ioutil.ReadFile("./cf_samples/elb-asg.json")
 			if err != nil {
