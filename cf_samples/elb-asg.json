@@ -1,0 +1,45 @@
+{
+  "Resources" : {
+    "ELB" : {
+      "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties" : {
+        "LoadBalancerName": "testing-cf",
+        "Subnets" : ["subnet-3f087e57"],
+        "Listeners": [
+          {
+            "InstancePort" : "80",
+            "InstanceProtocol" : "HTTP",
+            "LoadBalancerPort" : "80",
+            "Protocol" : "HTTP"
+          }
+        ]
+      }
+    },
+    "ASG": {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "HealthCheckGracePeriod" : 120,
+        "LaunchConfigurationName" : { "Ref" : "LaunchConfig" },
+        "LoadBalancerNames" : [ { "Ref" : "ELB" } ],
+        "MaxSize" : 1,
+        "MinSize" : 1,
+        "VPCZoneIdentifier" : ["subnet-3f087e57"]
+      }
+    },
+    "LaunchConfig": {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Properties" : {
+         "ImageId" : "ami-3bf11354",
+         "InstanceType" :"t2.micro",
+         "KeyName" : "pablo",
+         "SecurityGroups" : [ "sg-5d42b836" ]
+      }
+    }
+  },
+  "Outputs" : {
+    "URL" : {
+      "Description" : "The URL of the stack",
+      "Value" :  { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ELB", "DNSName" ]}]]}
+    }
+  }
+}
