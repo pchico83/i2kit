@@ -1,11 +1,13 @@
 package cf
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/pchico83/i2kit/linuxkit"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/pkg/api"
 )
@@ -21,7 +23,19 @@ func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
 				return err
 			}
 			decode := api.Codecs.UniversalDeserializer().Decode
-			_, _, err = decode(deploymentBytes, nil, nil)
+			deployment, _, err := decode(deploymentBytes, nil, nil)
+			if err != nil {
+				return err
+			}
+			linuxkitTemplate, err := linuxkit.Template(deployment)
+			if err != nil {
+				return err
+			}
+			ami, err := linuxkit.Export(linuxkitTemplate)
+			fmt.Println(ami) //alberto: remove this line
+			if err != nil {
+				return err
+			}
 			if err != nil {
 				return err
 			}
