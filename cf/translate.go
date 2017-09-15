@@ -9,7 +9,7 @@ import (
 	"github.com/pchico83/i2kit/k8"
 )
 
-const hostedZone string = "i2k.io"
+const hostedZone string = "i2kit.io"
 
 // ELB for CF
 func loadBalancerSection(deployment *k8.Deployment) *gocf.ElasticLoadBalancingLoadBalancer {
