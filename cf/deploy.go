@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/pchico83/i2kit/k8"
 	"github.com/pchico83/i2kit/linuxkit"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/pkg/api"
 )
 
 //NewDeploy deploys a k8 object
@@ -18,12 +18,7 @@ func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
 		Use:   "deploy",
 		Short: "Deploy a k8 object",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			deploymentBytes, err := ioutil.ReadFile(k8Path)
-			if err != nil {
-				return err
-			}
-			decode := api.Codecs.UniversalDeserializer().Decode
-			deployment, _, err := decode(deploymentBytes, nil, nil)
+			deployment, err := k8.Read(k8Path)
 			if err != nil {
 				return err
 			}

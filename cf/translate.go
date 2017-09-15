@@ -2,42 +2,36 @@ package cf
 
 import (
 	"encoding/json"
-	"fmt"
 
 	gocf "github.com/crewjam/go-cloudformation"
-	"k8s.io/client-go/pkg/runtime"
+	"github.com/pchico83/i2kit/k8"
 )
 
 // ELB for CF
-func loadBalancerSection(k8sDeployment runtime.Object) gocf.ElasticLoadBalancingLoadBalancer {
-	fmt.Printf("Ojbect %v", k8sDeployment)
+func loadBalancerSection(deployment k8.Deployment) gocf.ElasticLoadBalancingLoadBalancer {
 	elb := gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String("testing-i2kit"),
 		Subnets:          gocf.StringList(gocf.String("hello")),
 	}
-	/*
-		listeners := gocf.ElasticLoadBalancingListenerList{}
-		for _, container := range k8sDeployment["containers"] {
-			if _, exists := container["ports"]; exists {
-				for _, port := range container["ports"] {
-					listeners = append(listeners, gocf.ElasticLoadBalancingListener{
-						InstancePort:     port["containerPort"],
-						InstanceProtocol: gocf.String("HTTP"),
-						LoadBalancerPort: port["containerPort"],
-						Protocol:         gocf.String("HTTP"),
-					})
-				}
-			}
+	listeners := gocf.ElasticLoadBalancingListenerList{}
+	for _, container := range deployment.Spec.Template.Spec.Containers {
+		for _, port := range container.Ports {
+			listeners = append(listeners, gocf.ElasticLoadBalancingListener{
+				InstancePort:     port.ContainerPort,
+				InstanceProtocol: gocf.String("HTTP"),
+				LoadBalancerPort: port.ContainerPort,
+				Protocol:         gocf.String("HTTP"),
+			})
 		}
-		if len(listeners) > 0 {
-			elb.Listeners = &listeners
-		}
-	*/
+	}
+	if len(listeners) > 0 {
+		elb.Listeners = &listeners
+	}
 	return elb
 }
 
 // Auto-scaling group for CF
-func asgSection(k8sDeployment runtime.Object, ami string) (*gocf.AutoScalingAutoScalingGroup, *gocf.AutoScalingLaunchConfiguration) {
+func asgSection(deployment k8.Deployment, ami string) (*gocf.AutoScalingAutoScalingGroup, *gocf.AutoScalingLaunchConfiguration) {
 	// TODO parse number of instances from k8sFile
 	instances := "1"
 	asg := &gocf.AutoScalingAutoScalingGroup{
@@ -57,12 +51,11 @@ func asgSection(k8sDeployment runtime.Object, ami string) (*gocf.AutoScalingAuto
 	return asg, launchConfig
 }
 
-// Translates a k8s yaml to a CloudFormation template
-func Translate(k8sDeployment runtime.Object, ami string) ([]byte, error) {
-	k8sDeployment.GetObjectKind()
+// Translate a k8s yaml to a CloudFormation template
+func Translate(deployment k8.Deployment, ami string) ([]byte, error) {
 	t := gocf.NewTemplate()
-	t.AddResource("ELB", loadBalancerSection(k8sDeployment))
-	asg, launchConfig := asgSection(k8sDeployment, ami)
+	t.AddResource("ELB", loadBalancerSection(deployment))
+	asg, launchConfig := asgSection(deployment, ami)
 	t.AddResource("ASG", asg)
 	t.AddResource("LaunchConfig", launchConfig)
 	t.Outputs["URL"] = &gocf.Output{
