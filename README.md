@@ -1,5 +1,12 @@
 # i2kit
-i2kit is an immutable infrastructure (i2) deployment tool. It transforms k8 pods in virtual machines using linuxkit, and uses cloud provider technology to support networking, persistence and service discovery. This prototype is focus on AWS, using VPC for networking, ELBs for service discovery and EBS for persistency. The selling point is to have the goodness of docker for local dev, ci and distribution, and be compatible with k8 specs but eliminating the complexity and the abstraction layer of a cluster management tool.
+i2kit is an immutable infrastructure (i2) deployment tool. It transforms k8 pods in virtual machines using linuxkit, and uses cloud provider technology to support networking, persistence and service discovery.
+
+The selling point is to have the goodness of docker for local development, ci and distribution of content, but keeping the robustness and performance of classic cloud vendor technologies. i2kit does not require a central service, eliminating the complexity and the abstraction layer of a cluster management tool.
+
+# Implementation Details
+
+The first prototype focuses on AWS, using VPC for networking, ELBs for exposing k8 deployments (aká a set of pods), Route53 CNAMES for k8 services and deployment endpoints and EBS for persistency. In other words, a k8 deployment is transformed into a linuxkit AMI, an auto scalability group with the desired number of instances, and a ELB configured for the ports defined in the k8 deployment. Also, a Route53 CNAME for `deployment-name.i2kit.com` is created that resolves to the deployment ELB.
+i2kit also supports the deployment of k8 services by creating a CNAME that resolves to the ELBs of the deployment matching the the k8 service selector. In order to find these ELBs, i2kit uses AWS tags, tagging every k8 deployment with its labels.
 
 # Getting Started
 
@@ -10,8 +17,12 @@ go get -u github.com/moby/tool/cmd/moby
 go get -u github.com/linuxkit/linuxkit/src/cmd/linuxkit
 ```
 
-Build the `i2kit` binary:
+and the `aws-cli` configured with your credentials. Now, build the `i2kit` binary:
 
 ```
 go build -o /usr/local/bin/i2kit
+```
+
+```
+Note: we didn't have time to prepare a demo for the hackday but we will try to do it along the weekend and post and update to to #general
 ```
