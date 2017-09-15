@@ -9,7 +9,7 @@ import (
 	"github.com/pchico83/i2kit/k8"
 )
 
-const hostedZone string = "i2kit.io"
+const hostedZone string = "i2kit.io."
 
 // ELB for CF
 func loadBalancerSection(deployment *k8.Deployment) *gocf.ElasticLoadBalancingLoadBalancer {
@@ -40,11 +40,10 @@ func asgSection(deployment *k8.Deployment, ami string) (*gocf.AutoScalingAutoSca
 	asg := &gocf.AutoScalingAutoScalingGroup{
 		HealthCheckGracePeriod:  gocf.Integer(120),
 		LaunchConfigurationName: gocf.Ref("LaunchConfig").String(),
-		//LoadBalancerNames:       gocf.Ref("ELB").StringList(),
-		LoadBalancerNames: gocf.StringList(gocf.Ref("ELB")),
-		MaxSize:           gocf.String(replicas),
-		MinSize:           gocf.String(replicas),
-		VPCZoneIdentifier: gocf.StringList(gocf.String("subnet-3f087e57")),
+		LoadBalancerNames:       gocf.StringList(gocf.Ref("ELB")),
+		MaxSize:                 gocf.String(replicas),
+		MinSize:                 gocf.String(replicas),
+		VPCZoneIdentifier:       gocf.StringList(gocf.String("subnet-3f087e57")),
 	}
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:        gocf.String(ami),
