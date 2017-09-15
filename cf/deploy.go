@@ -3,6 +3,7 @@ package cf
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,20 +14,21 @@ import (
 )
 
 //NewDeploy deploys a k8 object
-func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
+func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
 		Short: "Deploy a k8 object",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			deployment, err := k8.Read(k8Path)
+			deployment, err := k8.Read(k8path)
 			if err != nil {
 				return err
 			}
-			linuxkitTemplate, err := linuxkit.GetTemplate(deployment)
+			linuxkitPath, err := linuxkit.GetTemplate(deployment)
 			if err != nil {
 				return err
 			}
-			ami, err := linuxkit.Export(linuxkitTemplate)
+			defer os.Remove(linuxkitPath)
+			ami, err := linuxkit.Export(linuxkitPath)
 			fmt.Println(ami) //alberto: remove this line
 			if err != nil {
 				return err
@@ -42,7 +44,7 @@ func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
 			cfTemplate := string(bytes)
 			inStack := &cloudformation.CreateStackInput{
 				Capabilities: []*string{aws.String("CAPABILITY_NAMED_IAM")},
-				StackName:    &name,
+				StackName:    &deployment.Metadata.Name,
 				TemplateBody: &cfTemplate,
 				Tags: []*cloudformation.Tag{
 					&cloudformation.Tag{

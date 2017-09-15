@@ -7,6 +7,6 @@ import (
 )
 
 func TestReadTemplate(t *testing.T) {
-	_, err := Read("./aws.yml")
+	_, err := read("./aws.yml")
 	require.NoError(t, err)
 }

@@ -28,11 +28,10 @@ func main() {
 		Region:      aws.String("eu-central-1"),
 		Credentials: credentials.NewSharedCredentials(awsCredentials, "default"),
 	}
-	name := "test"
-	k8Path := "./example.yml"
+	k8path := "./k8/templates/test.yml"
 	cmd.AddCommand(
-		cf.NewDeploy(name, k8Path, awsConfig),
-		cf.NewDestroy(name, awsConfig),
+		cf.NewDeploy(k8path, awsConfig),
+		cf.NewDestroy(k8path, awsConfig),
 	)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
