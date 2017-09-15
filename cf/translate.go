@@ -2,6 +2,7 @@ package cf
 
 import (
 	"encoding/json"
+	"strconv"
 
 	gocf "github.com/crewjam/go-cloudformation"
 	"github.com/pchico83/i2kit/k8"
@@ -17,9 +18,9 @@ func loadBalancerSection(deployment k8.Deployment) gocf.ElasticLoadBalancingLoad
 	for _, container := range deployment.Spec.Template.Spec.Containers {
 		for _, port := range container.Ports {
 			listeners = append(listeners, gocf.ElasticLoadBalancingListener{
-				InstancePort:     port.ContainerPort,
+				InstancePort:     gocf.String(strconv.Itoa(port.ContainerPort)),
 				InstanceProtocol: gocf.String("HTTP"),
-				LoadBalancerPort: port.ContainerPort,
+				LoadBalancerPort: gocf.String(strconv.Itoa(port.ContainerPort)),
 				Protocol:         gocf.String("HTTP"),
 			})
 		}
