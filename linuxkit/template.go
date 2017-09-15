@@ -33,9 +33,6 @@ func Read(path string) (*Template, error) {
 	if err != nil {
 		return nil, err
 	}
-	t, err := createTemplate(tYml)
-	if err != nil {
-		return nil, err
-	}
+	t := createTemplate(tYml)
 	return t, nil
 }

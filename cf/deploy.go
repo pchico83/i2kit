@@ -22,7 +22,7 @@ func NewDeploy(name, k8Path string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			linuxkitTemplate, err := linuxkit.Template(deployment)
+			linuxkitTemplate, err := linuxkit.GetTemplate(deployment)
 			if err != nil {
 				return err
 			}

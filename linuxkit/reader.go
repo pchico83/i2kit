@@ -42,7 +42,7 @@ func readYml(path string) (*templateYml, error) {
 	return &result, nil
 }
 
-func createTemplate(t *templateYml) (*Template, error) {
+func createTemplate(t *templateYml) *Template {
 	result := Template{
 		Kernel:   &KernelType{Image: t.Kernel.Image, Cmdline: t.Kernel.Cmdline},
 		Init:     []*string{},
@@ -76,5 +76,5 @@ func createTemplate(t *templateYml) (*Template, error) {
 	for _, org := range t.Trust.Org {
 		result.Trust.Org = append(result.Trust.Org, org)
 	}
-	return &result, nil
+	return &result
 }
