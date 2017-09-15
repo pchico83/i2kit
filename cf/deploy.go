@@ -2,7 +2,6 @@ package cf
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,19 +32,16 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			cfTemplate, err := Translate(deployment, ami, false)
 			if err != nil {
 				return err
 			}
+			cfTemplateString := string(cfTemplate)
 			svc := cloudformation.New(session.New(), awsConfig)
-			bytes, err := ioutil.ReadFile("./cf_samples/elb-asg.json")
-			if err != nil {
-				return err
-			}
-			cfTemplate := string(bytes)
 			inStack := &cloudformation.CreateStackInput{
 				Capabilities: []*string{aws.String("CAPABILITY_NAMED_IAM")},
 				StackName:    &deployment.Metadata.Name,
-				TemplateBody: &cfTemplate,
+				TemplateBody: &cfTemplateString,
 				Tags: []*cloudformation.Tag{
 					&cloudformation.Tag{
 						Key:   aws.String("i2kit"),

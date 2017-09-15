@@ -2,15 +2,18 @@ package cf
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	gocf "github.com/crewjam/go-cloudformation"
 	"github.com/pchico83/i2kit/k8"
 )
 
+const hostedZone string = "i2k.io"
+
 // ELB for CF
-func loadBalancerSection(deployment k8.Deployment) gocf.ElasticLoadBalancingLoadBalancer {
-	elb := gocf.ElasticLoadBalancingLoadBalancer{
+func loadBalancerSection(deployment *k8.Deployment) *gocf.ElasticLoadBalancingLoadBalancer {
+	elb := &gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String("testing-i2kit"),
 		Subnets:          gocf.StringList(gocf.String("hello")),
 	}
@@ -32,16 +35,15 @@ func loadBalancerSection(deployment k8.Deployment) gocf.ElasticLoadBalancingLoad
 }
 
 // Auto-scaling group for CF
-func asgSection(deployment k8.Deployment, ami string) (*gocf.AutoScalingAutoScalingGroup, *gocf.AutoScalingLaunchConfiguration) {
-	// TODO parse number of instances from k8sFile
-	instances := "1"
+func asgSection(deployment *k8.Deployment, ami string) (*gocf.AutoScalingAutoScalingGroup, *gocf.AutoScalingLaunchConfiguration) {
+	replicas := strconv.Itoa(deployment.Spec.Replicas)
 	asg := &gocf.AutoScalingAutoScalingGroup{
 		HealthCheckGracePeriod:  gocf.Integer(120),
-		LaunchConfigurationName: gocf.String(`{ "Ref" : "LaunchConfig" }`),
-		LoadBalancerNames:       gocf.StringList(gocf.String(`{ "Ref" : "ELB" }`)),
-		MaxSize:                 gocf.String(instances),
-		MinSize:                 gocf.String(instances),
-		VPCZoneIdentifier:       gocf.StringList(gocf.String(`["subnet-3f087e57"]`)),
+		LaunchConfigurationName: gocf.Ref("LaunchConfig").String(),
+		LoadBalancerNames:       gocf.Ref("ELB").StringList(),
+		MaxSize:                 gocf.String(replicas),
+		MinSize:                 gocf.String(replicas),
+		VPCZoneIdentifier:       gocf.StringList(gocf.String("subnet-3f087e57")),
 	}
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:        gocf.String(ami),
@@ -52,20 +54,43 @@ func asgSection(deployment k8.Deployment, ami string) (*gocf.AutoScalingAutoScal
 	return asg, launchConfig
 }
 
+func elbUrlOutput() *gocf.Output {
+	return &gocf.Output{
+		Description: "The URL of the stack",
+		Value:       gocf.Join("", gocf.String("http://"), gocf.GetAtt("ELB", "DNSName")),
+	}
+}
+
+func route53section(deployment *k8.Deployment) *gocf.Route53RecordSet {
+	recordSet := &gocf.Route53RecordSet{
+		HostedZoneName:  gocf.String(hostedZone),
+		Name:            gocf.String(fmt.Sprintf("%s.%s", deployment.Metadata.Name, hostedZone)),
+		Type:            gocf.String("CNAME"),
+		TTL:             gocf.String("900"),
+		ResourceRecords: gocf.StringList(gocf.GetAtt("ELB", "DNSName")),
+	}
+	return recordSet
+}
+
 // Translate a k8s yaml to a CloudFormation template
-func Translate(deployment k8.Deployment, ami string) ([]byte, error) {
+func Translate(deployment *k8.Deployment, ami string, pprint bool) ([]byte, error) {
 	t := gocf.NewTemplate()
 	t.AddResource("ELB", loadBalancerSection(deployment))
 	asg, launchConfig := asgSection(deployment, ami)
 	t.AddResource("ASG", asg)
 	t.AddResource("LaunchConfig", launchConfig)
-	t.Outputs["URL"] = &gocf.Output{
-		Description: "The URL of the stack",
-		Value:       `{ "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "ELB", "DNSName" ]}]]}`,
+	t.AddResource("DNSRecord", route53section(deployment))
+	t.Outputs["URL"] = elbUrlOutput()
+	if pprint {
+		templateMarshalled, err := json.MarshalIndent(t, "", "    ")
+		if err != nil {
+			return []byte(""), err
+		}
+		return templateMarshalled, nil
 	}
-	templateMarshalled, error := json.Marshal(t)
-	if error != nil {
-		return []byte(""), error
+	templateMarshalled, err := json.Marshal(t)
+	if err != nil {
+		return []byte(""), err
 	}
 	return templateMarshalled, nil
 }
