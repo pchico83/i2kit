@@ -21,16 +21,17 @@ func NewDestroy(k8path string, awsConfig *aws.Config) *cobra.Command {
 				return err
 			}
 			svc := cloudformation.New(session.New(), awsConfig)
+			deploymentName := deployment.GetObjectMeta().GetName()
 			response, err := svc.DescribeStacks(
 				&cloudformation.DescribeStacksInput{
-					StackName: aws.String(deployment.Metadata.Name),
+					StackName: aws.String(deploymentName),
 				},
 			)
 			if err != nil {
 				return err
 			}
 			if len(response.Stacks) == 0 {
-				fmt.Printf("Stack '%s' doesn't exist.\n", deployment.Metadata.Name)
+				fmt.Printf("Stack '%s' doesn't exist.\n", deploymentName)
 				return nil
 			}
 			stackID := response.Stacks[0].StackId

@@ -1,7 +1,6 @@
 package cf
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,7 +27,6 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			}
 			defer os.Remove(linuxkitPath)
 			ami, err := linuxkit.Export(linuxkitPath)
-			fmt.Println(ami) //alberto: remove this line
 			if err != nil {
 				return err
 			}
@@ -38,9 +36,10 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			}
 			cfTemplateString := string(cfTemplate)
 			svc := cloudformation.New(session.New(), awsConfig)
+			deploymentName := deployment.GetObjectMeta().GetName()
 			inStack := &cloudformation.CreateStackInput{
 				Capabilities: []*string{aws.String("CAPABILITY_NAMED_IAM")},
-				StackName:    &deployment.Metadata.Name,
+				StackName:    &deploymentName,
 				TemplateBody: &cfTemplateString,
 				Tags: []*cloudformation.Tag{
 					&cloudformation.Tag{
