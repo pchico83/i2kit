@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pchico83/i2kit/k8"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
 )
 
 //GetTemplate generates a linuxkit template from a k8 deployment object
-func GetTemplate(deployment *k8.Deployment) (string, error) {
+func GetTemplate(deployment *v1beta1.Deployment) (string, error) {
 	t, err := read("./aws.yml")
 	if err != nil {
 		return "", err
@@ -25,7 +25,7 @@ func GetTemplate(deployment *k8.Deployment) (string, error) {
 	}
 	file, err := ioutil.TempFile(
 		os.TempDir(),
-		fmt.Sprintf("%s-i2kit-", deployment.Metadata.Name),
+		fmt.Sprintf("%s-i2kit-", deployment.GetObjectMeta().GetName()),
 	)
 	if err != nil {
 		return "", err
