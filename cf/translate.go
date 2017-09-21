@@ -65,7 +65,7 @@ func elbURLOutput() *gocf.Output {
 func route53section(deployment *v1beta1.Deployment) *gocf.Route53RecordSet {
 	recordSet := &gocf.Route53RecordSet{
 		HostedZoneName:  gocf.String(hostedZone),
-		Name:            gocf.String(fmt.Sprintf("%s.%s", deployment.GetObjectMeta().GetName(), hostedZone)),
+		Name:            gocf.String(fmt.Sprintf("%s.%s", deployment.GetName(), hostedZone)),
 		Type:            gocf.String("CNAME"),
 		TTL:             gocf.String("900"),
 		ResourceRecords: gocf.StringList(gocf.GetAtt("ELB", "DNSName")),
