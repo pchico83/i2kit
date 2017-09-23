@@ -10,10 +10,9 @@ i2kit also supports the deployment of k8 services by creating a CNAME that resol
 
 # Getting Started
 
-Make sure you have `moby` and `linuxkit` tools installed:
+Make sure you have `linuxkit` tool installed:
 
 ```
-go get -u github.com/moby/tool/cmd/moby
 go get -u github.com/linuxkit/linuxkit/src/cmd/linuxkit
 ```
 
@@ -22,6 +21,10 @@ and the `aws-cli` configured with your credentials. Now, build the `i2kit` binar
 ```
 go build -o /usr/local/bin/i2kit
 ```
+
+`AWS_SHARED_CREDENTIALS_FILE` pointing to AWS file credentials (`AWS_CREDENTIALS`).
+`AWS_REGION` environment variable as this is used by the AWS Go SDK.
+S3 bucket in AWS named `linuxkit` // TODO: will be configurable soon
 
 ```
 Note: we didn't have time to prepare a demo for the hackday but we will try to do it along the weekend and post and update to to #general

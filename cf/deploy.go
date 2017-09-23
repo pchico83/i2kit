@@ -1,8 +1,6 @@
 package cf
 
 import (
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -21,12 +19,11 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			linuxkitPath, err := linuxkit.GetTemplate(deployment)
+			mobyTemplate, err := linuxkit.GetTemplate(deployment)
 			if err != nil {
 				return err
 			}
-			defer os.Remove(linuxkitPath)
-			ami, err := linuxkit.Export(linuxkitPath)
+			ami, err := linuxkit.Export(mobyTemplate, deployment.GetName())
 			if err != nil {
 				return err
 			}
@@ -36,7 +33,7 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			}
 			cfTemplateString := string(cfTemplate)
 			svc := cloudformation.New(session.New(), awsConfig)
-			deploymentName := deployment.GetObjectMeta().GetName()
+			deploymentName := deployment.GetName()
 			inStack := &cloudformation.CreateStackInput{
 				Capabilities: []*string{aws.String("CAPABILITY_NAMED_IAM")},
 				StackName:    &deploymentName,

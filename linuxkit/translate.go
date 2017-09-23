@@ -1,35 +1,30 @@
 package linuxkit
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 
+	"github.com/moby/tool/src/moby"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
 )
 
 //GetTemplate generates a linuxkit template from a k8 deployment object
-func GetTemplate(deployment *v1beta1.Deployment) (string, error) {
-	t, err := read("./aws.yml")
+func GetTemplate(deployment *v1beta1.Deployment) (*moby.Moby, error) {
+	configBytes, err := ioutil.ReadFile("./linuxkit/aws.yml")
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	mobyConfig, err := moby.NewConfig(configBytes)
+	if err != nil {
+		return nil, err
 	}
 	for _, container := range deployment.Spec.Template.Spec.Containers {
-		t.Services = append(
-			t.Services,
-			&containerYml{
+		mobyConfig.Services = append(
+			mobyConfig.Services,
+			moby.Image{
 				Name:  container.Name,
 				Image: container.Image,
 			},
 		)
 	}
-	file, err := ioutil.TempFile(
-		os.TempDir(),
-		fmt.Sprintf("%s-i2kit-", deployment.GetObjectMeta().GetName()),
-	)
-	if err != nil {
-		return "", err
-	}
-	write(t, file.Name())
-	return file.Name(), nil
+	return &mobyConfig, nil
 }
