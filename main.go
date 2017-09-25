@@ -24,8 +24,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	awsRegion := os.Getenv("AWS_REGION")
 	awsConfig := &aws.Config{
-		Region:      aws.String("eu-central-1"),
+		Region:      aws.String(awsRegion),
 		Credentials: credentials.NewSharedCredentials(awsCredentials, "default"),
 	}
 	k8path := "./k8/templates/test.yml"

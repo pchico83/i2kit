@@ -46,7 +46,7 @@ func linuxkitPush(deploymentPath string) (string, error) {
 	}
 	linuxkitPathTrimmed := strings.Trim(string(linuxkitPath), "\n")
 	deploymentPathRaw := fmt.Sprintf("%s.raw", deploymentPath)
-	cmd := exec.Command(string(linuxkitPathTrimmed), "-v", "push", "aws", "-timeout", "1200", "-bucket", "linuxkit", deploymentPathRaw)
+	cmd := exec.Command(string(linuxkitPathTrimmed), "-v", "push", "aws", "-timeout", "1200", "-bucket", "i2kit", deploymentPathRaw) // TODO configurable parameter (bucket)
 	stdoutStderr, err := utils.StreamCommand(cmd)
 	if err != nil {
 		return "", fmt.Errorf("Error executing linuxkit command: %s", err)
