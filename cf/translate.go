@@ -10,13 +10,13 @@ import (
 	gocf "github.com/crewjam/go-cloudformation"
 )
 
-const hostedZone string = "i2kit.io."
+const hostedZone string = "i2kit.com."
 
 // ELB for CF
 func loadBalancerSection(deployment *v1beta1.Deployment) *gocf.ElasticLoadBalancingLoadBalancer {
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String("testing-i2kit"),
-		Subnets:          gocf.StringList(gocf.String("hello")),
+		Subnets:          gocf.StringList(gocf.String("subnet-41ebe426")), // TODO configurable parameter
 	}
 	listeners := gocf.ElasticLoadBalancingListenerList{}
 	for _, container := range deployment.Spec.Template.Spec.Containers {
@@ -44,13 +44,13 @@ func asgSection(deployment *v1beta1.Deployment, ami string) (*gocf.AutoScalingAu
 		LoadBalancerNames:       gocf.StringList(gocf.Ref("ELB")),
 		MaxSize:                 gocf.String(replicas),
 		MinSize:                 gocf.String(replicas),
-		VPCZoneIdentifier:       gocf.StringList(gocf.String("subnet-3f087e57")),
+		VPCZoneIdentifier:       gocf.StringList(gocf.String("subnet-41ebe426")), // TODO configurable parameter
 	}
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:        gocf.String(ami),
 		InstanceType:   gocf.String("t2.micro"),
-		KeyName:        gocf.String("pablo"),
-		SecurityGroups: []string{"sg-5d42b836"},
+		KeyName:        gocf.String("alberto-us-west-2"), // TODO configurable parameter
+		SecurityGroups: []string{"sg-721feb08"},          // TODO configurable parameter
 	}
 	return asg, launchConfig
 }
