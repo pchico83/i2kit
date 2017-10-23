@@ -1,12 +1,15 @@
 package cf
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/pchico83/i2kit/k8"
 	"github.com/pchico83/i2kit/linuxkit"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 //NewDeploy deploys a k8 object
@@ -23,6 +26,13 @@ func NewDeploy(k8path string, awsConfig *aws.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			// TODO: for debugging purposes only, will be implemented when added a "verbose" flag
+			d, err := yaml.Marshal(&mobyTemplate)
+			if err != nil {
+				return fmt.Errorf("error marshalling: %v", err)
+			}
+			fmt.Printf("--- moby template:\n%s\n", string(d))
+			// END TODO
 			ami, err := linuxkit.Export(mobyTemplate, deployment.GetName())
 			if err != nil {
 				return err
