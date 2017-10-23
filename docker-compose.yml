@@ -1,0 +1,5 @@
+version: "3"
+services:
+  i2kit:
+    image: pchico83/i2kit
+    build: .
