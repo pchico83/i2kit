@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -32,8 +31,8 @@ func mobyBuild(mobyTemplate *moby.Moby, deploymentPath string) error {
 	image := buf.Bytes()
 	log.Infof("Create outputs in %s:", deploymentPath)
 	buildFormats := []string{"raw"} // AWS requires a RAW image
-	buildHyperkit := runtime.GOOS == "darwin"
-	return moby.Formats(deploymentPath, image, buildFormats, 1024, buildHyperkit)
+	//buildHyperkit := runtime.GOOS == "darwin"
+	return moby.Formats(deploymentPath, image, buildFormats, 1024) //, buildHyperkit)
 }
 
 // Push image built by Moby to AWS S3 and then build the associated AMI

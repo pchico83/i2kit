@@ -21,7 +21,7 @@ func GetTemplate(deployment *v1beta1.Deployment) (*moby.Moby, error) {
 	for _, container := range deployment.Spec.Template.Spec.Containers {
 		mobyConfig.Services = append(
 			mobyConfig.Services,
-			moby.Image{
+			&moby.Image{
 				Name:         container.Name,
 				Image:        container.Image,
 				Capabilities: allCapabilities,
