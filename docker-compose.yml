@@ -3,3 +3,8 @@ services:
   i2kit:
     image: pchico83/i2kit
     build: .
+    environment:
+      - AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws-credentials
+      - AWS_REGION=eu-central-1
+    volumes:
+      - $PWD/aws-credentials:/run/secrets/aws-credentials
