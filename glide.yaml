@@ -1,0 +1,28 @@
+package: github.com/pchico83/i2kit
+import:
+- package: github.com/aws/aws-sdk-go
+  subpackages:
+  - aws
+  - aws/credentials
+  - aws/session
+  - service/cloudformation
+- package: github.com/crewjam/go-cloudformation
+- package: github.com/moby/tool
+  subpackages:
+  - src/moby
+- package: github.com/sirupsen/logrus
+- package: github.com/Sirupsen/logrus
+  repo: git@github.com:/sirupsen/logrus
+  vcs: git
+- package: github.com/spf13/cobra
+- package: gopkg.in/yaml.v2
+- package: k8s.io/api
+  subpackages:
+  - extensions/v1beta1
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/util/yaml
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - require

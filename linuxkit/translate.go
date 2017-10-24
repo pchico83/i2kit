@@ -17,14 +17,12 @@ func GetTemplate(deployment *v1beta1.Deployment) (*moby.Moby, error) {
 	if err != nil {
 		return nil, err
 	}
-	allCapabilities := &[]string{"all"}
 	for _, container := range deployment.Spec.Template.Spec.Containers {
 		mobyConfig.Services = append(
 			mobyConfig.Services,
 			&moby.Image{
-				Name:         container.Name,
-				Image:        container.Image,
-				Capabilities: allCapabilities,
+				Name:  container.Name,
+				Image: container.Image,
 			},
 		)
 	}
