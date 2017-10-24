@@ -6,10 +6,6 @@ RUN apk update && \
 
 ENV SRC_DIR=/go/src/github.com/pchico83/i2kit
 WORKDIR $SRC_DIR
-RUN go get github.com/Sirupsen/logrus
-RUN go get github.com/moby/tool/src/moby
-RUN go get k8s.io/api/extensions/v1beta1
-RUN go get k8s.io/apimachinery/pkg/util/yaml
 ADD . $SRC_DIR
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /usr/local/bin/i2kit
 

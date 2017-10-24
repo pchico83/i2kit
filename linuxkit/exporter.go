@@ -10,9 +10,9 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/moby/tool/src/moby"
 	"github.com/pchico83/i2kit/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 var re utils.CustomRegex = utils.CustomRegex{regexp.MustCompile("Created AMI: (?P<ami>ami-[a-z0-9]+)")}
