@@ -10,15 +10,14 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
-
-const defaultNameForStdin = "moby"
 
 var streamable = map[string]bool{
 	"docker": true,
@@ -144,7 +143,12 @@ func outputImage(image *Image, section string, prefix string, m Moby, idMap map[
 // Build performs the actual build process
 func Build(m Moby, w io.Writer, pull bool, tp string) error {
 	if MobyDir == "" {
-		return fmt.Errorf("MobyDir for temporary storage not set")
+		MobyDir = defaultMobyConfigDir()
+	}
+
+	// create tmp dir in case needed
+	if err := os.MkdirAll(filepath.Join(MobyDir, "tmp"), 0755); err != nil {
+		return err
 	}
 
 	iw := tar.NewWriter(w)
@@ -190,6 +194,7 @@ func Build(m Moby, w io.Writer, pull bool, tp string) error {
 		log.Infof("Add init containers:")
 	}
 	for _, ii := range m.initRefs {
+		log.Infof("Process init image: %s", ii)
 		err := ImageTar(ii, "", iw, enforceContentTrust(ii.String(), &m.Trust), pull, resolvconfSymlink)
 		if err != nil {
 			return fmt.Errorf("Failed to build init tarball from %s: %v", ii, err)

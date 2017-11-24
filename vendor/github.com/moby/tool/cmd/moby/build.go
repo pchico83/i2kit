@@ -9,11 +9,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/moby/tool/src/moby"
+	log "github.com/sirupsen/logrus"
 )
 
 const defaultNameForStdin = "moby"
@@ -25,32 +24,11 @@ func (f *formatList) String() string {
 }
 
 func (f *formatList) Set(value string) error {
-	// allow comma seperated options or multiple options
+	// allow comma separated options or multiple options
 	for _, cs := range strings.Split(value, ",") {
 		*f = append(*f, cs)
 	}
 	return nil
-}
-
-// Parse a string which is either a number in MB, or a number with
-// either M (for Megabytes) or G (for GigaBytes) as a suffix and
-// returns the number in MB. Return 0 if string is empty.
-func getDiskSizeMB(s string) (int, error) {
-	if s == "" {
-		return 0, nil
-	}
-	sz := len(s)
-	if strings.HasSuffix(s, "G") {
-		i, err := strconv.Atoi(s[:sz-1])
-		if err != nil {
-			return 0, err
-		}
-		return i * 1024, nil
-	}
-	if strings.HasSuffix(s, "M") {
-		s = s[:sz-1]
-	}
-	return strconv.Atoi(s)
 }
 
 // Process the build arguments and execute build
@@ -176,7 +154,7 @@ func build(args []string) {
 			buffer := new(bytes.Buffer)
 			response, err := http.Get(arg)
 			if err != nil {
-				log.Fatal("Cannot fetch remote yaml file: %v", err)
+				log.Fatalf("Cannot fetch remote yaml file: %v", err)
 			}
 			defer response.Body.Close()
 			_, err = io.Copy(buffer, response.Body)

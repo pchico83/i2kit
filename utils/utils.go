@@ -51,7 +51,7 @@ func StreamCommand(cmd *exec.Cmd) (*bytes.Buffer, error) {
 		for scannerOut.Scan() {
 			scannedBytes := scannerOut.Bytes()
 			outErr.Write(scannedBytes)
-			fmt.Printf("linuxkit out | %s\n", string(scannedBytes))
+			fmt.Printf("command out | %s\n", string(scannedBytes))
 		}
 	}()
 	scannerErr := bufio.NewScanner(cmdErrReader)
@@ -59,7 +59,7 @@ func StreamCommand(cmd *exec.Cmd) (*bytes.Buffer, error) {
 		for scannerErr.Scan() {
 			scannedBytes := scannerErr.Bytes()
 			outErr.Write(scannedBytes)
-			fmt.Printf("linuxkit err | %s\n", string(scannedBytes))
+			fmt.Printf("command err | %s\n", string(scannedBytes))
 		}
 	}()
 	err = cmd.Start()

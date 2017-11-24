@@ -451,6 +451,91 @@ func (c *Glue) BatchGetPartitionWithContext(ctx aws.Context, input *BatchGetPart
 	return out, req.Send()
 }
 
+const opBatchStopJobRun = "BatchStopJobRun"
+
+// BatchStopJobRunRequest generates a "aws/request.Request" representing the
+// client's request for the BatchStopJobRun operation. The "output" return
+// value will be populated with the request's response once the request complets
+// successfuly.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See BatchStopJobRun for more information on using the BatchStopJobRun
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the BatchStopJobRunRequest method.
+//    req, resp := client.BatchStopJobRunRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRun
+func (c *Glue) BatchStopJobRunRequest(input *BatchStopJobRunInput) (req *request.Request, output *BatchStopJobRunOutput) {
+	op := &request.Operation{
+		Name:       opBatchStopJobRun,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &BatchStopJobRunInput{}
+	}
+
+	output = &BatchStopJobRunOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// BatchStopJobRun API operation for AWS Glue.
+//
+// Stops a batch of job runs for a given job.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for AWS Glue's
+// API operation BatchStopJobRun for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeInvalidInputException "InvalidInputException"
+//   The input provided was not valid.
+//
+//   * ErrCodeInternalServiceException "InternalServiceException"
+//   An internal service error occurred.
+//
+//   * ErrCodeOperationTimeoutException "OperationTimeoutException"
+//   The operation timed out.
+//
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRun
+func (c *Glue) BatchStopJobRun(input *BatchStopJobRunInput) (*BatchStopJobRunOutput, error) {
+	req, out := c.BatchStopJobRunRequest(input)
+	return out, req.Send()
+}
+
+// BatchStopJobRunWithContext is the same as BatchStopJobRun with the addition of
+// the ability to pass a context and additional request options.
+//
+// See BatchStopJobRun for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *Glue) BatchStopJobRunWithContext(ctx aws.Context, input *BatchStopJobRunInput, opts ...request.Option) (*BatchStopJobRunOutput, error) {
+	req, out := c.BatchStopJobRunRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opCreateClassifier = "CreateClassifier"
 
 // CreateClassifierRequest generates a "aws/request.Request" representing the
@@ -495,7 +580,8 @@ func (c *Glue) CreateClassifierRequest(input *CreateClassifierInput) (req *reque
 
 // CreateClassifier API operation for AWS Glue.
 //
-// Creates a Classifier in the user's account.
+// Creates a classifier in the user's account. This may be either a GrokClassifier
+// or an XMLClassifier.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -665,7 +751,7 @@ func (c *Glue) CreateCrawlerRequest(input *CreateCrawlerInput) (req *request.Req
 
 // CreateCrawler API operation for AWS Glue.
 //
-// Creates a new Crawler with specified targets, role, configuration, and optional
+// Creates a new crawler with specified targets, role, configuration, and optional
 // schedule. At least one crawl target must be specified, in either the s3Targets
 // or the jdbcTargets field.
 //
@@ -1495,7 +1581,7 @@ func (c *Glue) DeleteClassifierRequest(input *DeleteClassifierInput) (req *reque
 
 // DeleteClassifier API operation for AWS Glue.
 //
-// Removes a Classifier from the metadata store.
+// Removes a classifier from the Data Catalog.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1659,7 +1745,7 @@ func (c *Glue) DeleteCrawlerRequest(input *DeleteCrawlerInput) (req *request.Req
 
 // DeleteCrawler API operation for AWS Glue.
 //
-// Removes a specified Crawler from the metadata store, unless the Crawler state
+// Removes a specified crawler from the Data Catalog, unless the crawler state
 // is RUNNING.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -2440,7 +2526,7 @@ func (c *Glue) GetClassifierRequest(input *GetClassifierInput) (req *request.Req
 
 // GetClassifier API operation for AWS Glue.
 //
-// Retrieve a Classifier by name.
+// Retrieve a classifier by name.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -2528,7 +2614,7 @@ func (c *Glue) GetClassifiersRequest(input *GetClassifiersInput) (req *request.R
 
 // GetClassifiers API operation for AWS Glue.
 //
-// Lists all Classifier objects in the metadata store.
+// Lists all classifier objects in the Data Catalog.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -2877,7 +2963,7 @@ func (c *Glue) GetCrawlerRequest(input *GetCrawlerInput) (req *request.Request, 
 
 // GetCrawler API operation for AWS Glue.
 //
-// Retrieves metadata for a specified Crawler.
+// Retrieves metadata for a specified crawler.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -3100,7 +3186,7 @@ func (c *Glue) GetCrawlersRequest(input *GetCrawlersInput) (req *request.Request
 
 // GetCrawlers API operation for AWS Glue.
 //
-// Retrieves metadata for all Crawlers defined in the customer account.
+// Retrieves metadata for all crawlers defined in the customer account.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -4257,6 +4343,9 @@ func (c *Glue) GetMappingRequest(input *GetMappingInput) (req *request.Request, 
 //
 //   * ErrCodeOperationTimeoutException "OperationTimeoutException"
 //   The operation timed out.
+//
+//   * ErrCodeEntityNotFoundException "EntityNotFoundException"
+//   A specified entity does not exist
 //
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/GetMapping
 func (c *Glue) GetMapping(input *GetMappingInput) (*GetMappingOutput, error) {
@@ -5652,8 +5741,8 @@ func (c *Glue) StartCrawlerRequest(input *StartCrawlerInput) (req *request.Reque
 
 // StartCrawler API operation for AWS Glue.
 //
-// Starts a crawl using the specified Crawler, regardless of what is scheduled.
-// If the Crawler is already running, does nothing.
+// Starts a crawl using the specified crawler, regardless of what is scheduled.
+// If the crawler is already running, does nothing.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -6018,7 +6107,7 @@ func (c *Glue) StopCrawlerRequest(input *StopCrawlerInput) (req *request.Request
 
 // StopCrawler API operation for AWS Glue.
 //
-// If the specified Crawler is running, stops the crawl.
+// If the specified crawler is running, stops the crawl.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -6283,7 +6372,7 @@ func (c *Glue) UpdateClassifierRequest(input *UpdateClassifierInput) (req *reque
 
 // UpdateClassifier API operation for AWS Glue.
 //
-// Modifies an existing Classifier.
+// Modifies an existing classifier (either a GrokClassifier or an XMLClassifier).
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -6456,7 +6545,7 @@ func (c *Glue) UpdateCrawlerRequest(input *UpdateCrawlerInput) (req *request.Req
 
 // UpdateCrawler API operation for AWS Glue.
 //
-// Updates a Crawler. If a Crawler is running, you must stop it using StopCrawler
+// Updates a crawler. If a crawler is running, you must stop it using StopCrawler
 // before updating it.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -6548,7 +6637,7 @@ func (c *Glue) UpdateCrawlerScheduleRequest(input *UpdateCrawlerScheduleInput) (
 
 // UpdateCrawlerSchedule API operation for AWS Glue.
 //
-// Updates the schedule of a crawler using a Cron expression.
+// Updates the schedule of a crawler using a cron expression.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -7217,12 +7306,15 @@ func (c *Glue) UpdateUserDefinedFunctionWithContext(ctx aws.Context, input *Upda
 	return out, req.Send()
 }
 
+// Defines an action to be initiated by a trigger.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/Action
 type Action struct {
 	_ struct{} `type:"structure"`
 
+	// Arguments to be passed to the job.
 	Arguments map[string]*string `type:"map"`
 
+	// The name of a job to be executed.
 	JobName *string `min:"1" type:"string"`
 }
 
@@ -7810,6 +7902,177 @@ func (s *BatchGetPartitionOutput) SetUnprocessedKeys(v []*PartitionValueList) *B
 	return s
 }
 
+// Details about the job run and the error that occurred while trying to submit
+// it for stopping.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRunError
+type BatchStopJobRunError struct {
+	_ struct{} `type:"structure"`
+
+	// The details of the error that occurred.
+	ErrorDetail *ErrorDetail `type:"structure"`
+
+	// The name of the job.
+	JobName *string `min:"1" type:"string"`
+
+	// The job run Id.
+	JobRunId *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s BatchStopJobRunError) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s BatchStopJobRunError) GoString() string {
+	return s.String()
+}
+
+// SetErrorDetail sets the ErrorDetail field's value.
+func (s *BatchStopJobRunError) SetErrorDetail(v *ErrorDetail) *BatchStopJobRunError {
+	s.ErrorDetail = v
+	return s
+}
+
+// SetJobName sets the JobName field's value.
+func (s *BatchStopJobRunError) SetJobName(v string) *BatchStopJobRunError {
+	s.JobName = &v
+	return s
+}
+
+// SetJobRunId sets the JobRunId field's value.
+func (s *BatchStopJobRunError) SetJobRunId(v string) *BatchStopJobRunError {
+	s.JobRunId = &v
+	return s
+}
+
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRunRequest
+type BatchStopJobRunInput struct {
+	_ struct{} `type:"structure"`
+
+	// The name of the job whose job runs are to be stopped.
+	//
+	// JobName is a required field
+	JobName *string `min:"1" type:"string" required:"true"`
+
+	// A list of job run Ids of the given job to be stopped.
+	//
+	// JobRunIds is a required field
+	JobRunIds []*string `min:"1" type:"list" required:"true"`
+}
+
+// String returns the string representation
+func (s BatchStopJobRunInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s BatchStopJobRunInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *BatchStopJobRunInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "BatchStopJobRunInput"}
+	if s.JobName == nil {
+		invalidParams.Add(request.NewErrParamRequired("JobName"))
+	}
+	if s.JobName != nil && len(*s.JobName) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("JobName", 1))
+	}
+	if s.JobRunIds == nil {
+		invalidParams.Add(request.NewErrParamRequired("JobRunIds"))
+	}
+	if s.JobRunIds != nil && len(s.JobRunIds) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("JobRunIds", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetJobName sets the JobName field's value.
+func (s *BatchStopJobRunInput) SetJobName(v string) *BatchStopJobRunInput {
+	s.JobName = &v
+	return s
+}
+
+// SetJobRunIds sets the JobRunIds field's value.
+func (s *BatchStopJobRunInput) SetJobRunIds(v []*string) *BatchStopJobRunInput {
+	s.JobRunIds = v
+	return s
+}
+
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRunResponse
+type BatchStopJobRunOutput struct {
+	_ struct{} `type:"structure"`
+
+	// A list containing the job run Ids and details of the error that occurred
+	// for each job run while submitting to stop.
+	Errors []*BatchStopJobRunError `type:"list"`
+
+	// A list of job runs which are successfully submitted for stopping.
+	SuccessfulSubmissions []*BatchStopJobRunSuccessfulSubmission `type:"list"`
+}
+
+// String returns the string representation
+func (s BatchStopJobRunOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s BatchStopJobRunOutput) GoString() string {
+	return s.String()
+}
+
+// SetErrors sets the Errors field's value.
+func (s *BatchStopJobRunOutput) SetErrors(v []*BatchStopJobRunError) *BatchStopJobRunOutput {
+	s.Errors = v
+	return s
+}
+
+// SetSuccessfulSubmissions sets the SuccessfulSubmissions field's value.
+func (s *BatchStopJobRunOutput) SetSuccessfulSubmissions(v []*BatchStopJobRunSuccessfulSubmission) *BatchStopJobRunOutput {
+	s.SuccessfulSubmissions = v
+	return s
+}
+
+// Details about the job run which is submitted successfully for stopping.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/BatchStopJobRunSuccessfulSubmission
+type BatchStopJobRunSuccessfulSubmission struct {
+	_ struct{} `type:"structure"`
+
+	// The name of the job.
+	JobName *string `min:"1" type:"string"`
+
+	// The job run Id.
+	JobRunId *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s BatchStopJobRunSuccessfulSubmission) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s BatchStopJobRunSuccessfulSubmission) GoString() string {
+	return s.String()
+}
+
+// SetJobName sets the JobName field's value.
+func (s *BatchStopJobRunSuccessfulSubmission) SetJobName(v string) *BatchStopJobRunSuccessfulSubmission {
+	s.JobName = &v
+	return s
+}
+
+// SetJobRunId sets the JobRunId field's value.
+func (s *BatchStopJobRunSuccessfulSubmission) SetJobRunId(v string) *BatchStopJobRunSuccessfulSubmission {
+	s.JobRunId = &v
+	return s
+}
+
 // Specifies a table definition in the Data Catalog.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/CatalogEntry
 type CatalogEntry struct {
@@ -7913,17 +8176,23 @@ func (s *CatalogImportStatus) SetImportedBy(v string) *CatalogImportStatus {
 	return s
 }
 
-// Classifiers are written in Python and triggered during a Crawl Task. You
-// can write your own Classifiers to best categorize your data sources and specify
-// the appropriate schemas to use for them. A Classifier first checks whether
-// a given file is in a format it can handle, and then, if so, creates a schema
-// in the form of a StructType object that matches that data format.
+// Classifiers are written in Python and triggered during a crawl task. You
+// can write your own classifiers to best categorize your data sources and specify
+// the appropriate schemas to use for them. A classifier checks whether a given
+// file is in a format it can handle, and if it is, the classifier creates a
+// schema in the form of a StructType object that matches that data format.
+//
+// A classifier can be either a grok classifier or an XML classifier, specified
+// in one or the other field of the Classifier object.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/Classifier
 type Classifier struct {
 	_ struct{} `type:"structure"`
 
 	// A GrokClassifier object.
 	GrokClassifier *GrokClassifier `type:"structure"`
+
+	// An XMLClassifier object.
+	XMLClassifier *XMLClassifier `type:"structure"`
 }
 
 // String returns the string representation
@@ -7939,6 +8208,12 @@ func (s Classifier) GoString() string {
 // SetGrokClassifier sets the GrokClassifier field's value.
 func (s *Classifier) SetGrokClassifier(v *GrokClassifier) *Classifier {
 	s.GrokClassifier = v
+	return s
+}
+
+// SetXMLClassifier sets the XMLClassifier field's value.
+func (s *Classifier) SetXMLClassifier(v *XMLClassifier) *Classifier {
+	s.XMLClassifier = v
 	return s
 }
 
@@ -8225,14 +8500,18 @@ func (s *Column) SetType(v string) *Column {
 	return s
 }
 
+// Defines a condition under which a trigger fires.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/Condition
 type Condition struct {
 	_ struct{} `type:"structure"`
 
+	// The name of the job in question.
 	JobName *string `min:"1" type:"string"`
 
+	// A logical operator.
 	LogicalOperator *string `type:"string" enum:"LogicalOperator"`
 
+	// The condition state.
 	State *string `type:"string" enum:"JobRunState"`
 }
 
@@ -8285,7 +8564,8 @@ type Connection struct {
 	// A list of key-value pairs used as parameters for this connection.
 	ConnectionProperties map[string]*string `type:"map"`
 
-	// The type of the connection.
+	// The type of the connection. Currently, only JDBC is supported; SFTP is not
+	// supported.
 	ConnectionType *string `type:"string" enum:"ConnectionType"`
 
 	// The time this connection definition was created.
@@ -8383,7 +8663,8 @@ type ConnectionInput struct {
 	// A list of key-value pairs used as parameters for this connection.
 	ConnectionProperties map[string]*string `type:"map"`
 
-	// The type of the connection.
+	// The type of the connection. Currently, only JDBC is supported; SFTP is not
+	// supported.
 	ConnectionType *string `type:"string" enum:"ConnectionType"`
 
 	// Description of the connection.
@@ -8490,59 +8771,67 @@ func (s *ConnectionsList) SetConnections(v []*string) *ConnectionsList {
 }
 
 // Specifies a crawler program that examines a data source and uses classifiers
-// to try to its schema. If successful, the crawler records metatdata concerning
-// the data source in the Data Catalog.
+// to try to determine its schema. If successful, the crawler records metadata
+// concerning the data source in the AWS Glue Data Catalog.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/Crawler
 type Crawler struct {
 	_ struct{} `type:"structure"`
 
-	// A list of custom Classifiers associated with this Crawler.
+	// A list of custom classifiers associated with the crawler.
 	Classifiers []*string `type:"list"`
 
-	// If this Crawler is running, contains the total time elapsed since the last
+	// Crawler configuration information. This versioned JSON string allows users
+	// to specify aspects of a Crawler's behavior.
+	//
+	// You can use this field to force partitions to inherit metadata such as classification,
+	// input format, output format, serde information, and schema from their parent
+	// table, rather than detect this information separately for each partition.
+	// Use the following JSON string to specify that behavior:
+	Configuration *string `type:"string"`
+
+	// If the crawler is running, contains the total time elapsed since the last
 	// crawl began.
 	CrawlElapsedTime *int64 `type:"long"`
 
-	// The time when the Crawler was created.
+	// The time when the crawler was created.
 	CreationTime *time.Time `type:"timestamp" timestampFormat:"unix"`
 
-	// The Database where this Crawler's output should be stored.
+	// The database where metadata is written by this crawler.
 	DatabaseName *string `type:"string"`
 
-	// A description of this Crawler and where it should be used.
+	// A description of the crawler.
 	Description *string `type:"string"`
 
 	// The status of the last crawl, and potentially error information if an error
 	// occurred.
 	LastCrawl *LastCrawlInfo `type:"structure"`
 
-	// The time the Crawler was last updated.
+	// The time the crawler was last updated.
 	LastUpdated *time.Time `type:"timestamp" timestampFormat:"unix"`
 
-	// The Crawler name.
+	// The crawler name.
 	Name *string `min:"1" type:"string"`
 
-	// The ARN of an IAM role used to access customer resources such as data in
-	// S3.
+	// The IAM role (or ARN of an IAM role) used to access customer resources, such
+	// as data in Amazon S3.
 	Role *string `type:"string"`
 
-	// A Schedule object that specifies the schedule on which this Crawler is to
-	// be run.
+	// For scheduled crawlers, the schedule when the crawler runs.
 	Schedule *Schedule `type:"structure"`
 
-	// Sets policy for the crawler's update and delete behavior.
+	// Sets the behavior when the crawler finds a changed or deleted object.
 	SchemaChangePolicy *SchemaChangePolicy `type:"structure"`
 
-	// Indicates whether this Crawler is running, or whether a run is pending.
+	// Indicates whether the crawler is running, or whether a run is pending.
 	State *string `type:"string" enum:"CrawlerState"`
 
-	// The table prefix used for catalog tables created.
+	// The prefix added to the names of tables that are created.
 	TablePrefix *string `type:"string"`
 
 	// A collection of targets to crawl.
 	Targets *CrawlerTargets `type:"structure"`
 
-	// The version of the Crawler.
+	// The version of the crawler.
 	Version *int64 `type:"long"`
 }
 
@@ -8559,6 +8848,12 @@ func (s Crawler) GoString() string {
 // SetClassifiers sets the Classifiers field's value.
 func (s *Crawler) SetClassifiers(v []*string) *Crawler {
 	s.Classifiers = v
+	return s
+}
+
+// SetConfiguration sets the Configuration field's value.
+func (s *Crawler) SetConfiguration(v string) *Crawler {
+	s.Configuration = &v
 	return s
 }
 
@@ -8660,16 +8955,17 @@ type CrawlerMetrics struct {
 	// The median duration of this crawler's runs, in seconds.
 	MedianRuntimeSeconds *float64 `type:"double"`
 
-	// True if the crawler is estimating its
+	// True if the crawler is still estimating how long it will take to complete
+	// this run.
 	StillEstimating *bool `type:"boolean"`
 
-	// A list of the tables created by this crawler.
+	// The number of tables created by this crawler.
 	TablesCreated *int64 `type:"integer"`
 
-	// A list of the tables deleted by this crawler.
+	// The number of tables deleted by this crawler.
 	TablesDeleted *int64 `type:"integer"`
 
-	// A list of the tables created by this crawler.
+	// The number of tables updated by this crawler.
 	TablesUpdated *int64 `type:"integer"`
 
 	// The estimated time left to complete a running crawl.
@@ -8734,7 +9030,7 @@ func (s *CrawlerMetrics) SetTimeLeftSeconds(v float64) *CrawlerMetrics {
 	return s
 }
 
-// Specifies crawler targets.
+// Specifies data stores to crawl.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/CrawlerTargets
 type CrawlerTargets struct {
 	_ struct{} `type:"structure"`
@@ -8742,7 +9038,7 @@ type CrawlerTargets struct {
 	// Specifies JDBC targets.
 	JdbcTargets []*JdbcTarget `type:"list"`
 
-	// Specifies targets in AWS S3.
+	// Specifies Amazon S3 targets.
 	S3Targets []*S3Target `type:"list"`
 }
 
@@ -8772,8 +9068,11 @@ func (s *CrawlerTargets) SetS3Targets(v []*S3Target) *CrawlerTargets {
 type CreateClassifierInput struct {
 	_ struct{} `type:"structure"`
 
-	// A grok classifier to create.
+	// A GrokClassifier object specifying the classifier to create.
 	GrokClassifier *CreateGrokClassifierRequest `type:"structure"`
+
+	// An XMLClassifier object specifying the classifier to create.
+	XMLClassifier *CreateXMLClassifierRequest `type:"structure"`
 }
 
 // String returns the string representation
@@ -8794,6 +9093,11 @@ func (s *CreateClassifierInput) Validate() error {
 			invalidParams.AddNested("GrokClassifier", err.(request.ErrInvalidParams))
 		}
 	}
+	if s.XMLClassifier != nil {
+		if err := s.XMLClassifier.Validate(); err != nil {
+			invalidParams.AddNested("XMLClassifier", err.(request.ErrInvalidParams))
+		}
+	}
 
 	if invalidParams.Len() > 0 {
 		return invalidParams
@@ -8804,6 +9108,12 @@ func (s *CreateClassifierInput) Validate() error {
 // SetGrokClassifier sets the GrokClassifier field's value.
 func (s *CreateClassifierInput) SetGrokClassifier(v *CreateGrokClassifierRequest) *CreateClassifierInput {
 	s.GrokClassifier = v
+	return s
+}
+
+// SetXMLClassifier sets the XMLClassifier field's value.
+func (s *CreateClassifierInput) SetXMLClassifier(v *CreateXMLClassifierRequest) *CreateClassifierInput {
+	s.XMLClassifier = v
 	return s
 }
 
@@ -8898,38 +9208,48 @@ func (s CreateConnectionOutput) GoString() string {
 type CreateCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// A list of custom Classifier names that the user has registered. By default,
-	// all AWS classifiers are included in a crawl, but these custom classifiers
-	// always override the default classifiers for a given classification.
+	// A list of custom classifiers that the user has registered. By default, all
+	// AWS classifiers are included in a crawl, but these custom classifiers always
+	// override the default classifiers for a given classification.
 	Classifiers []*string `type:"list"`
 
-	// The Glue Database where results will be stored, such as: arn:aws:daylight:us-east-1::database/sometable/*.
+	// Crawler configuration information. This versioned JSON string allows users
+	// to specify aspects of a Crawler's behavior.
+	//
+	// You can use this field to force partitions to inherit metadata such as classification,
+	// input format, output format, serde information, and schema from their parent
+	// table, rather than detect this information separately for each partition.
+	Configuration *string `type:"string"`
+
+	// The AWS Glue database where results are written, such as: arn:aws:daylight:us-east-1::database/sometable/*.
 	//
 	// DatabaseName is a required field
 	DatabaseName *string `type:"string" required:"true"`
 
-	// A description of the new Crawler.
+	// A description of the new crawler.
 	Description *string `type:"string"`
 
-	// Name of the new Crawler.
+	// Name of the new crawler.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
 
-	// The AWS ARN of the IAM role used by the new Crawler to access customer resources.
+	// The IAM role (or ARN of an IAM role) used by the new crawler to access customer
+	// resources.
 	//
 	// Role is a required field
 	Role *string `type:"string" required:"true"`
 
-	// A cron expression that can be used as a Cloudwatch event (see CloudWatch
-	// Schedule Expression Syntax (http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
-	// For example, to run every day at 12:15 UTC, specify: cron(15 12 * * ? *).
+	// A cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 
 	// Policy for the crawler's update and deletion behavior.
 	SchemaChangePolicy *SchemaChangePolicy `type:"structure"`
 
-	// The table prefix used for catalog tables created.
+	// The table prefix used for catalog tables that are created.
 	TablePrefix *string `type:"string"`
 
 	// A list of collection of targets to crawl.
@@ -8976,6 +9296,12 @@ func (s *CreateCrawlerInput) Validate() error {
 // SetClassifiers sets the Classifiers field's value.
 func (s *CreateCrawlerInput) SetClassifiers(v []*string) *CreateCrawlerInput {
 	s.Classifiers = v
+	return s
+}
+
+// SetConfiguration sets the Configuration field's value.
+func (s *CreateCrawlerInput) SetConfiguration(v string) *CreateCrawlerInput {
+	s.Configuration = &v
 	return s
 }
 
@@ -9127,15 +9453,22 @@ type CreateDevEndpointInput struct {
 	// DevEndpoint.
 	ExtraJarsS3Path *string `type:"string"`
 
-	// Path to one or more Python libraries in an S3 bucket that should be loaded
-	// in your DevEndpoint.
+	// Path(s) to one or more Python libraries in an S3 bucket that should be loaded
+	// in your DevEndpoint. Multiple values must be complete paths separated by
+	// a comma.
+	//
+	// Please note that only pure Python libraries can currently be used on a DevEndpoint.
+	// Libraries that rely on C extensions, such as the pandas (http://pandas.pydata.org/)
+	// Python data analysis library, are not yet supported.
 	ExtraPythonLibsS3Path *string `type:"string"`
 
-	// The number of nodes to use.
+	// The number of AWS Glue Data Processing Units (DPUs) to allocate to this DevEndpoint.
 	NumberOfNodes *int64 `type:"integer"`
 
 	// The public key to use for authentication.
-	PublicKey *string `type:"string"`
+	//
+	// PublicKey is a required field
+	PublicKey *string `type:"string" required:"true"`
 
 	// The IAM role for the DevEndpoint.
 	//
@@ -9143,14 +9476,10 @@ type CreateDevEndpointInput struct {
 	RoleArn *string `type:"string" required:"true"`
 
 	// Security group IDs for the security groups to be used by the new DevEndpoint.
-	//
-	// SecurityGroupIds is a required field
-	SecurityGroupIds []*string `type:"list" required:"true"`
+	SecurityGroupIds []*string `type:"list"`
 
 	// The subnet ID for the new DevEndpoint to use.
-	//
-	// SubnetId is a required field
-	SubnetId *string `type:"string" required:"true"`
+	SubnetId *string `type:"string"`
 }
 
 // String returns the string representation
@@ -9169,14 +9498,11 @@ func (s *CreateDevEndpointInput) Validate() error {
 	if s.EndpointName == nil {
 		invalidParams.Add(request.NewErrParamRequired("EndpointName"))
 	}
+	if s.PublicKey == nil {
+		invalidParams.Add(request.NewErrParamRequired("PublicKey"))
+	}
 	if s.RoleArn == nil {
 		invalidParams.Add(request.NewErrParamRequired("RoleArn"))
-	}
-	if s.SecurityGroupIds == nil {
-		invalidParams.Add(request.NewErrParamRequired("SecurityGroupIds"))
-	}
-	if s.SubnetId == nil {
-		invalidParams.Add(request.NewErrParamRequired("SubnetId"))
 	}
 
 	if invalidParams.Len() > 0 {
@@ -9250,14 +9576,14 @@ type CreateDevEndpointOutput struct {
 	// DevEndpoint.
 	ExtraJarsS3Path *string `type:"string"`
 
-	// Path to one or more Python libraries in an S3 bucket that will be loaded
+	// Path(s) to one or more Python libraries in an S3 bucket that will be loaded
 	// in your DevEndpoint.
 	ExtraPythonLibsS3Path *string `type:"string"`
 
 	// The reason for a current failure in this DevEndpoint.
 	FailureReason *string `type:"string"`
 
-	// The number of nodes in this DevEndpoint.
+	// The number of AWS Glue Data Processing Units (DPUs) allocated to this DevEndpoint.
 	NumberOfNodes *int64 `type:"integer"`
 
 	// The AWS ARN of the role assigned to the new DevEndpoint.
@@ -9277,6 +9603,9 @@ type CreateDevEndpointOutput struct {
 
 	// The address of the YARN endpoint used by this DevEndpoint.
 	YarnEndpointAddress *string `type:"string"`
+
+	// The Apache Zeppelin port for the remote Apache Spark interpreter.
+	ZeppelinRemoteSparkInterpreterPort *int64 `type:"integer"`
 }
 
 // String returns the string representation
@@ -9367,18 +9696,24 @@ func (s *CreateDevEndpointOutput) SetYarnEndpointAddress(v string) *CreateDevEnd
 	return s
 }
 
-// Specifies a Grok classifier for CreateClassifier to create.
+// SetZeppelinRemoteSparkInterpreterPort sets the ZeppelinRemoteSparkInterpreterPort field's value.
+func (s *CreateDevEndpointOutput) SetZeppelinRemoteSparkInterpreterPort(v int64) *CreateDevEndpointOutput {
+	s.ZeppelinRemoteSparkInterpreterPort = &v
+	return s
+}
+
+// Specifies a grok classifier for CreateClassifier to create.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/CreateGrokClassifierRequest
 type CreateGrokClassifierRequest struct {
 	_ struct{} `type:"structure"`
 
-	// The type of result that the classifier matches, such as Twitter Json, Omniture
-	// logs, Cloudwatch logs, and so forth.
+	// An identifier of the data format that the classifier matches, such as Twitter,
+	// JSON, Omniture logs, Amazon CloudWatch Logs, and so on.
 	//
 	// Classification is a required field
 	Classification *string `type:"string" required:"true"`
 
-	// Custom grok patterns used by this classifier.
+	// Optional custom grok patterns used by this classifier.
 	CustomPatterns *string `type:"string"`
 
 	// The grok pattern used by this classifier.
@@ -9386,7 +9721,7 @@ type CreateGrokClassifierRequest struct {
 	// GrokPattern is a required field
 	GrokPattern *string `min:"1" type:"string" required:"true"`
 
-	// The name of the new Classifier.
+	// The name of the new classifier.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -9476,7 +9811,7 @@ type CreateJobInput struct {
 	// for this job.
 	ExecutionProperty *ExecutionProperty `type:"structure"`
 
-	// Location of the logs for this job.
+	// This field is reserved for future use.
 	LogUri *string `type:"string"`
 
 	// The maximum number of times to retry this job if it fails.
@@ -9911,7 +10246,10 @@ type CreateTriggerInput struct {
 	// A predicate to specify when the new trigger should fire.
 	Predicate *Predicate `type:"structure"`
 
-	// A cron schedule expression for the new trigger.
+	// A cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 
 	// The type of the new trigger.
@@ -10116,6 +10454,74 @@ func (s CreateUserDefinedFunctionOutput) GoString() string {
 	return s.String()
 }
 
+// Specifies an XML classifier for CreateClassifier to create.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/CreateXMLClassifierRequest
+type CreateXMLClassifierRequest struct {
+	_ struct{} `type:"structure"`
+
+	// An identifier of the data format that the classifier matches.
+	//
+	// Classification is a required field
+	Classification *string `type:"string" required:"true"`
+
+	// The name of the classifier.
+	//
+	// Name is a required field
+	Name *string `min:"1" type:"string" required:"true"`
+
+	// The XML tag designating the element that contains each record in an XML document
+	// being parsed. Note that this cannot be an empty element. It must contain
+	// child elements representing fields in the record.
+	RowTag *string `type:"string"`
+}
+
+// String returns the string representation
+func (s CreateXMLClassifierRequest) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s CreateXMLClassifierRequest) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *CreateXMLClassifierRequest) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "CreateXMLClassifierRequest"}
+	if s.Classification == nil {
+		invalidParams.Add(request.NewErrParamRequired("Classification"))
+	}
+	if s.Name == nil {
+		invalidParams.Add(request.NewErrParamRequired("Name"))
+	}
+	if s.Name != nil && len(*s.Name) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Name", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetClassification sets the Classification field's value.
+func (s *CreateXMLClassifierRequest) SetClassification(v string) *CreateXMLClassifierRequest {
+	s.Classification = &v
+	return s
+}
+
+// SetName sets the Name field's value.
+func (s *CreateXMLClassifierRequest) SetName(v string) *CreateXMLClassifierRequest {
+	s.Name = &v
+	return s
+}
+
+// SetRowTag sets the RowTag field's value.
+func (s *CreateXMLClassifierRequest) SetRowTag(v string) *CreateXMLClassifierRequest {
+	s.RowTag = &v
+	return s
+}
+
 // The Database object represents a logical grouping of tables that may reside
 // in a Hive metastore or an RDBMS.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/Database
@@ -10257,7 +10663,7 @@ func (s *DatabaseInput) SetParameters(v map[string]*string) *DatabaseInput {
 type DeleteClassifierInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Classifier to remove.
+	// Name of the classifier to remove.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -10384,7 +10790,7 @@ func (s DeleteConnectionOutput) GoString() string {
 type DeleteCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Crawler to remove.
+	// Name of the crawler to remove.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -10984,10 +11390,18 @@ type DevEndpoint struct {
 
 	// Path to one or more Java Jars in an S3 bucket that should be loaded in your
 	// DevEndpoint.
+	//
+	// Please note that only pure Java/Scala libraries can currently be used on
+	// a DevEndpoint.
 	ExtraJarsS3Path *string `type:"string"`
 
-	// Path to one or more Python libraries in an S3 bucket that should be loaded
-	// in your DevEndpoint.
+	// Path(s) to one or more Python libraries in an S3 bucket that should be loaded
+	// in your DevEndpoint. Multiple values must be complete paths separated by
+	// a comma.
+	//
+	// Please note that only pure Python libraries can currently be used on a DevEndpoint.
+	// Libraries that rely on C extensions, such as the pandas (http://pandas.pydata.org/)
+	// Python data analysis library, are not yet supported.
 	ExtraPythonLibsS3Path *string `type:"string"`
 
 	// The reason for a current failure in this DevEndpoint.
@@ -10999,7 +11413,7 @@ type DevEndpoint struct {
 	// The status of the last update.
 	LastUpdateStatus *string `type:"string"`
 
-	// The number of nodes used by this DevEndpoint.
+	// The number of AWS Glue Data Processing Units (DPUs) allocated to this DevEndpoint.
 	NumberOfNodes *int64 `type:"integer"`
 
 	// The public address used by this DevEndpoint.
@@ -11025,6 +11439,9 @@ type DevEndpoint struct {
 
 	// The YARN endpoint address used by this DevEndpoint.
 	YarnEndpointAddress *string `type:"string"`
+
+	// The Apache Zeppelin port for the remote Apache Spark interpreter.
+	ZeppelinRemoteSparkInterpreterPort *int64 `type:"integer"`
 }
 
 // String returns the string representation
@@ -11139,6 +11556,12 @@ func (s *DevEndpoint) SetYarnEndpointAddress(v string) *DevEndpoint {
 	return s
 }
 
+// SetZeppelinRemoteSparkInterpreterPort sets the ZeppelinRemoteSparkInterpreterPort field's value.
+func (s *DevEndpoint) SetZeppelinRemoteSparkInterpreterPort(v int64) *DevEndpoint {
+	s.ZeppelinRemoteSparkInterpreterPort = &v
+	return s
+}
+
 // Custom libraries to be loaded into a DevEndpoint.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/DevEndpointCustomLibraries
 type DevEndpointCustomLibraries struct {
@@ -11146,10 +11569,18 @@ type DevEndpointCustomLibraries struct {
 
 	// Path to one or more Java Jars in an S3 bucket that should be loaded in your
 	// DevEndpoint.
+	//
+	// Please note that only pure Java/Scala libraries can currently be used on
+	// a DevEndpoint.
 	ExtraJarsS3Path *string `type:"string"`
 
-	// Path to one or more Python libraries in an S3 bucket that should be loaded
-	// in your DevEndpoint.
+	// Path(s) to one or more Python libraries in an S3 bucket that should be loaded
+	// in your DevEndpoint. Multiple values must be complete paths separated by
+	// a comma.
+	//
+	// Please note that only pure Python libraries can currently be used on a DevEndpoint.
+	// Libraries that rely on C extensions, such as the pandas (http://pandas.pydata.org/)
+	// Python data analysis library, are not yet supported.
 	ExtraPythonLibsS3Path *string `type:"string"`
 }
 
@@ -11300,7 +11731,7 @@ func (s *GetCatalogImportStatusOutput) SetImportStatus(v *CatalogImportStatus) *
 type GetClassifierInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Classifier to retrieve.
+	// Name of the classifier to retrieve.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -11342,7 +11773,7 @@ func (s *GetClassifierInput) SetName(v string) *GetClassifierInput {
 type GetClassifierOutput struct {
 	_ struct{} `type:"structure"`
 
-	// The requested Classifier.
+	// The requested classifier.
 	Classifier *Classifier `type:"structure"`
 }
 
@@ -11412,7 +11843,7 @@ func (s *GetClassifiersInput) SetNextToken(v string) *GetClassifiersInput {
 type GetClassifiersOutput struct {
 	_ struct{} `type:"structure"`
 
-	// The requested list of Classifier objects.
+	// The requested list of classifier objects.
 	Classifiers []*Classifier `type:"list"`
 
 	// A continuation token.
@@ -11525,7 +11956,8 @@ func (s *GetConnectionOutput) SetConnection(v *Connection) *GetConnectionOutput 
 type GetConnectionsFilter struct {
 	_ struct{} `type:"structure"`
 
-	// The type of connections to return.
+	// The type of connections to return. Currently, only JDBC is supported; SFTP
+	// is not supported.
 	ConnectionType *string `type:"string" enum:"ConnectionType"`
 
 	// A criteria string that must match the criteria recorded in the connection
@@ -11661,7 +12093,7 @@ func (s *GetConnectionsOutput) SetNextToken(v string) *GetConnectionsOutput {
 type GetCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Crawler to retrieve metadata for.
+	// Name of the crawler to retrieve metadata for.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -11792,7 +12224,7 @@ func (s *GetCrawlerMetricsOutput) SetNextToken(v string) *GetCrawlerMetricsOutpu
 type GetCrawlerOutput struct {
 	_ struct{} `type:"structure"`
 
-	// The metadata for the specified Crawler.
+	// The metadata for the specified crawler.
 	Crawler *Crawler `type:"structure"`
 }
 
@@ -11816,7 +12248,7 @@ func (s *GetCrawlerOutput) SetCrawler(v *Crawler) *GetCrawlerOutput {
 type GetCrawlersInput struct {
 	_ struct{} `type:"structure"`
 
-	// The number of Crawlers to return on each call.
+	// The number of crawlers to return on each call.
 	MaxResults *int64 `min:"1" type:"integer"`
 
 	// A continuation token, if this is a continuation request.
@@ -11862,7 +12294,7 @@ func (s *GetCrawlersInput) SetNextToken(v string) *GetCrawlersInput {
 type GetCrawlersOutput struct {
 	_ struct{} `type:"structure"`
 
-	// A list of Crawler metadata.
+	// A list of crawler metadata.
 	Crawlers []*Crawler `type:"list"`
 
 	// A continuation token, if the returned list has not reached the end of those
@@ -13056,7 +13488,7 @@ func (s *GetPlanInput) SetSource(v *CatalogEntry) *GetPlanInput {
 type GetPlanOutput struct {
 	_ struct{} `type:"structure"`
 
-	// A python script to perform the mapping.
+	// A Python script to perform the mapping.
 	PythonScript *string `type:"string"`
 }
 
@@ -13799,13 +14231,13 @@ func (s *GetUserDefinedFunctionsOutput) SetUserDefinedFunctions(v []*UserDefined
 	return s
 }
 
-// A classifier that uses grok.
+// A classifier that uses grok patterns.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/GrokClassifier
 type GrokClassifier struct {
 	_ struct{} `type:"structure"`
 
-	// The data form that the classifier matches, such as Twitter, JSON, Omniture
-	// Logs, and so forth.
+	// An identifier of the data format that the classifier matches, such as Twitter,
+	// JSON, Omniture logs, and so on.
 	//
 	// Classification is a required field
 	Classification *string `type:"string" required:"true"`
@@ -13813,10 +14245,12 @@ type GrokClassifier struct {
 	// The time this classifier was registered.
 	CreationTime *time.Time `type:"timestamp" timestampFormat:"unix"`
 
-	// Custom grok patterns used by this classifier.
+	// Optional custom grok patterns defined by this classifier. For more information,
+	// see custom patterns in Writing Custom Classifers (http://docs.aws.amazon.com/glue/latest/dg/custom-classifier.html).
 	CustomPatterns *string `type:"string"`
 
-	// The grok pattern used by this classifier.
+	// The grok pattern applied to a data store by this classifier. For more information,
+	// see built-in patterns in Writing Custom Classifers (http://docs.aws.amazon.com/glue/latest/dg/custom-classifier.html).
 	//
 	// GrokPattern is a required field
 	GrokPattern *string `min:"1" type:"string" required:"true"`
@@ -13938,15 +14372,16 @@ func (s ImportCatalogToGlueOutput) GoString() string {
 	return s.String()
 }
 
-// Specifies a JDBC target for a crawl.
+// Specifies a JDBC data store to crawl.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/JdbcTarget
 type JdbcTarget struct {
 	_ struct{} `type:"structure"`
 
-	// The name of the connection to use for the JDBC target.
+	// The name of the connection to use to connect to the JDBC target.
 	ConnectionName *string `type:"string"`
 
-	// A list of items to exclude from the crawl.
+	// A list of glob patterns used to exclude from the crawl. For more information,
+	// see Catalog Tables with a Crawler (http://docs.aws.amazon.com/glue/latest/dg/add-crawler.html).
 	Exclusions []*string `type:"list"`
 
 	// The path of the JDBC target.
@@ -14011,7 +14446,7 @@ type Job struct {
 	// The last point in time when this job specification was modified.
 	LastModifiedOn *time.Time `type:"timestamp" timestampFormat:"unix"`
 
-	// Location of the logs for this job.
+	// This field is reserved for future use.
 	LogUri *string `type:"string"`
 
 	// The maximum number of times to retry this job if it fails.
@@ -14358,7 +14793,7 @@ type JobUpdate struct {
 	// for this job.
 	ExecutionProperty *ExecutionProperty `type:"structure"`
 
-	// Location of the logs for this job.
+	// This field is reserved for future use.
 	LogUri *string `type:"string"`
 
 	// The maximum number of times to retry this job if it fails.
@@ -14437,7 +14872,7 @@ func (s *JobUpdate) SetRole(v string) *JobUpdate {
 type LastCrawlInfo struct {
 	_ struct{} `type:"structure"`
 
-	// Error information about the last crawl, if an error occurred.
+	// If an error occurred, the error information about the last crawl.
 	ErrorMessage *string `type:"string"`
 
 	// The log group for the last crawl.
@@ -14510,7 +14945,7 @@ type Location struct {
 	// A JDBC location.
 	Jdbc []*CodeGenNodeArg `type:"list"`
 
-	// An AWS S3 location.
+	// An Amazon S3 location.
 	S3 []*CodeGenNodeArg `type:"list"`
 }
 
@@ -14892,10 +15327,13 @@ func (s *PartitionInput) SetValues(v []*string) *PartitionInput {
 	return s
 }
 
+// Contains a list of values defining partitions.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/PartitionValueList
 type PartitionValueList struct {
 	_ struct{} `type:"structure"`
 
+	// The list of values.
+	//
 	// Values is a required field
 	Values []*string `type:"list" required:"true"`
 }
@@ -15186,15 +15624,16 @@ func (s *ResourceUri) SetUri(v string) *ResourceUri {
 	return s
 }
 
-// Specifies a crawler target in AWS S3.
+// Specifies a data store in Amazon S3.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/S3Target
 type S3Target struct {
 	_ struct{} `type:"structure"`
 
-	// A list of S3 objects to exclude from the crawl.
+	// A list of glob patterns used to exclude from the crawl. For more information,
+	// see Catalog Tables with a Crawler (http://docs.aws.amazon.com/glue/latest/dg/add-crawler.html).
 	Exclusions []*string `type:"list"`
 
-	// The path to the S3 target.
+	// The path to the Amazon S3 target.
 	Path *string `type:"string"`
 }
 
@@ -15225,8 +15664,8 @@ func (s *S3Target) SetPath(v string) *S3Target {
 type Schedule struct {
 	_ struct{} `type:"structure"`
 
-	// A cron expression that can be used as a Cloudwatch event to schedule something
-	// (see CloudWatch Schedule Expression Syntax (http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
+	// A cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
 	// For example, to run something every day at 12:15 UTC, you would specify:
 	// cron(15 12 * * ? *).
 	ScheduleExpression *string `type:"string"`
@@ -15262,10 +15701,10 @@ func (s *Schedule) SetState(v string) *Schedule {
 type SchemaChangePolicy struct {
 	_ struct{} `type:"structure"`
 
-	// The deletion behavior.
+	// The deletion behavior when the crawler finds a deleted object.
 	DeleteBehavior *string `type:"string" enum:"DeleteBehavior"`
 
-	// The update behavior.
+	// The update behavior when the crawler finds a changed schema.
 	UpdateBehavior *string `type:"string" enum:"UpdateBehavior"`
 }
 
@@ -15459,7 +15898,7 @@ func (s *SkewedInfo) SetSkewedColumnValues(v []*string) *SkewedInfo {
 type StartCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Crawler to start.
+	// Name of the crawler to start.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -15735,7 +16174,7 @@ func (s *StartTriggerOutput) SetName(v string) *StartTriggerOutput {
 type StopCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// Name of the Crawler to stop.
+	// Name of the crawler to stop.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
@@ -16437,13 +16876,15 @@ func (s *TableInput) SetViewOriginalText(v string) *TableInput {
 	return s
 }
 
+// Specifies a version of a table.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/TableVersion
 type TableVersion struct {
 	_ struct{} `type:"structure"`
 
-	// Represents a collection of related data organized in columns and rows.
+	// The table in question
 	Table *Table `type:"structure"`
 
+	// The ID value that identifies this table version.
 	VersionId *string `min:"1" type:"string"`
 }
 
@@ -16489,7 +16930,10 @@ type Trigger struct {
 	// The predicate of this trigger.
 	Predicate *Predicate `type:"structure"`
 
-	// A cron schedule expression.
+	// A cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 
 	// The current state of the trigger.
@@ -16574,7 +17018,10 @@ type TriggerUpdate struct {
 	// The predicate of this trigger, which defines when it will fire.
 	Predicate *Predicate `type:"structure"`
 
-	// A cron expression specifying the schedule.
+	// An updated cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 }
 
@@ -16652,6 +17099,9 @@ type UpdateClassifierInput struct {
 
 	// A GrokClassifier object with updated fields.
 	GrokClassifier *UpdateGrokClassifierRequest `type:"structure"`
+
+	// An XMLClassifier object with updated fields.
+	XMLClassifier *UpdateXMLClassifierRequest `type:"structure"`
 }
 
 // String returns the string representation
@@ -16672,6 +17122,11 @@ func (s *UpdateClassifierInput) Validate() error {
 			invalidParams.AddNested("GrokClassifier", err.(request.ErrInvalidParams))
 		}
 	}
+	if s.XMLClassifier != nil {
+		if err := s.XMLClassifier.Validate(); err != nil {
+			invalidParams.AddNested("XMLClassifier", err.(request.ErrInvalidParams))
+		}
+	}
 
 	if invalidParams.Len() > 0 {
 		return invalidParams
@@ -16682,6 +17137,12 @@ func (s *UpdateClassifierInput) Validate() error {
 // SetGrokClassifier sets the GrokClassifier field's value.
 func (s *UpdateClassifierInput) SetGrokClassifier(v *UpdateGrokClassifierRequest) *UpdateClassifierInput {
 	s.GrokClassifier = v
+	return s
+}
+
+// SetXMLClassifier sets the XMLClassifier field's value.
+func (s *UpdateClassifierInput) SetXMLClassifier(v *UpdateXMLClassifierRequest) *UpdateClassifierInput {
+	s.XMLClassifier = v
 	return s
 }
 
@@ -16793,37 +17254,48 @@ func (s UpdateConnectionOutput) GoString() string {
 type UpdateCrawlerInput struct {
 	_ struct{} `type:"structure"`
 
-	// A list of custom Classifier names that the user has registered. By default,
-	// all AWS classifiers are included in a crawl, but these custom classifiers
-	// always override the default classifiers for a given classification.
+	// A list of custom classifiers that the user has registered. By default, all
+	// classifiers are included in a crawl, but these custom classifiers always
+	// override the default classifiers for a given classification.
 	Classifiers []*string `type:"list"`
 
-	// The Glue Database where results will be stored, such as: arn:aws:daylight:us-east-1::database/sometable/*.
+	// Crawler configuration information. This versioned JSON string allows users
+	// to specify aspects of a Crawler's behavior.
+	//
+	// You can use this field to force partitions to inherit metadata such as classification,
+	// input format, output format, serde information, and schema from their parent
+	// table, rather than detect this information separately for each partition.
+	// Use the following JSON string to specify that behavior:
+	Configuration *string `type:"string"`
+
+	// The AWS Glue database where results are stored, such as: arn:aws:daylight:us-east-1::database/sometable/*.
 	DatabaseName *string `type:"string"`
 
-	// A description of the new Crawler.
+	// A description of the new crawler.
 	Description *string `type:"string"`
 
-	// Name of the new Crawler.
+	// Name of the new crawler.
 	//
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
 
-	// The AWS ARN of the IAM role used by the new Crawler to access customer resources.
+	// The IAM role (or ARN of an IAM role) used by the new crawler to access customer
+	// resources.
 	Role *string `type:"string"`
 
-	// A cron expression that can be used as a Cloudwatch event (see CloudWatch
-	// Schedule Expression Syntax (http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html).
-	// For example, to run every day at 12:15 UTC, specify: cron(15 12 * * ? *).
+	// A cron expression used to specify the schedule (see Time-Based Schedules
+	// for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 
 	// Policy for the crawler's update and deletion behavior.
 	SchemaChangePolicy *SchemaChangePolicy `type:"structure"`
 
-	// The table prefix used for catalog tables created.
+	// The table prefix used for catalog tables that are created.
 	TablePrefix *string `type:"string"`
 
-	// A list of collection of targets to crawl.
+	// A list of targets to crawl.
 	Targets *CrawlerTargets `type:"structure"`
 }
 
@@ -16856,6 +17328,12 @@ func (s *UpdateCrawlerInput) Validate() error {
 // SetClassifiers sets the Classifiers field's value.
 func (s *UpdateCrawlerInput) SetClassifiers(v []*string) *UpdateCrawlerInput {
 	s.Classifiers = v
+	return s
+}
+
+// SetConfiguration sets the Configuration field's value.
+func (s *UpdateCrawlerInput) SetConfiguration(v string) *UpdateCrawlerInput {
+	s.Configuration = &v
 	return s
 }
 
@@ -16931,7 +17409,10 @@ type UpdateCrawlerScheduleInput struct {
 	// CrawlerName is a required field
 	CrawlerName *string `min:"1" type:"string" required:"true"`
 
-	// Cron expression of the updated schedule.
+	// The updated cron expression used to specify the schedule (see Time-Based
+	// Schedules for Jobs and Crawlers (http://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html).
+	// For example, to run something every day at 12:15 UTC, you would specify:
+	// cron(15 12 * * ? *).
 	Schedule *string `type:"string"`
 }
 
@@ -17082,7 +17563,7 @@ func (s UpdateDatabaseOutput) GoString() string {
 type UpdateDevEndpointInput struct {
 	_ struct{} `type:"structure"`
 
-	// Custom Python or Java custom libraries to be loaded in the DevEndpoint.
+	// Custom Python or Java libraries to be loaded in the DevEndpoint.
 	CustomLibraries *DevEndpointCustomLibraries `type:"structure"`
 
 	// The name of the DevEndpoint to be updated.
@@ -17092,6 +17573,10 @@ type UpdateDevEndpointInput struct {
 
 	// The public key for the DevEndpoint to use.
 	PublicKey *string `type:"string"`
+
+	// True if the list of custom libraries to be loaded in the development endpoint
+	// needs to be updated, or False otherwise.
+	UpdateEtlLibraries *bool `type:"boolean"`
 }
 
 // String returns the string representation
@@ -17135,6 +17620,12 @@ func (s *UpdateDevEndpointInput) SetPublicKey(v string) *UpdateDevEndpointInput 
 	return s
 }
 
+// SetUpdateEtlLibraries sets the UpdateEtlLibraries field's value.
+func (s *UpdateDevEndpointInput) SetUpdateEtlLibraries(v bool) *UpdateDevEndpointInput {
+	s.UpdateEtlLibraries = &v
+	return s
+}
+
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/UpdateDevEndpointResponse
 type UpdateDevEndpointOutput struct {
 	_ struct{} `type:"structure"`
@@ -17150,16 +17641,16 @@ func (s UpdateDevEndpointOutput) GoString() string {
 	return s.String()
 }
 
-// Specifies a Grok classifier to update when passed to UpdateClassifier.
+// Specifies a grok classifier to update when passed to UpdateClassifier.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/UpdateGrokClassifierRequest
 type UpdateGrokClassifierRequest struct {
 	_ struct{} `type:"structure"`
 
-	// The type of result that the classifier matches, such as Twitter Json, Omniture
-	// logs, Cloudwatch logs, and so forth.
+	// An identifier of the data format that the classifier matches, such as Twitter,
+	// JSON, Omniture logs, Amazon CloudWatch Logs, and so on.
 	Classification *string `type:"string"`
 
-	// Custom grok patterns used by this classifier.
+	// Optional custom grok patterns used by this classifier.
 	CustomPatterns *string `type:"string"`
 
 	// The grok pattern used by this classifier.
@@ -17704,6 +18195,69 @@ func (s UpdateUserDefinedFunctionOutput) GoString() string {
 	return s.String()
 }
 
+// Specifies an XML classifier to be updated.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/UpdateXMLClassifierRequest
+type UpdateXMLClassifierRequest struct {
+	_ struct{} `type:"structure"`
+
+	// An identifier of the data format that the classifier matches.
+	Classification *string `type:"string"`
+
+	// The name of the classifier.
+	//
+	// Name is a required field
+	Name *string `min:"1" type:"string" required:"true"`
+
+	// The XML tag designating the element that contains each record in an XML document
+	// being parsed. Note that this cannot be an empty element. It must contain
+	// child elements representing fields in the record.
+	RowTag *string `type:"string"`
+}
+
+// String returns the string representation
+func (s UpdateXMLClassifierRequest) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s UpdateXMLClassifierRequest) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *UpdateXMLClassifierRequest) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "UpdateXMLClassifierRequest"}
+	if s.Name == nil {
+		invalidParams.Add(request.NewErrParamRequired("Name"))
+	}
+	if s.Name != nil && len(*s.Name) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Name", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetClassification sets the Classification field's value.
+func (s *UpdateXMLClassifierRequest) SetClassification(v string) *UpdateXMLClassifierRequest {
+	s.Classification = &v
+	return s
+}
+
+// SetName sets the Name field's value.
+func (s *UpdateXMLClassifierRequest) SetName(v string) *UpdateXMLClassifierRequest {
+	s.Name = &v
+	return s
+}
+
+// SetRowTag sets the RowTag field's value.
+func (s *UpdateXMLClassifierRequest) SetRowTag(v string) *UpdateXMLClassifierRequest {
+	s.RowTag = &v
+	return s
+}
+
 // Represents the equivalent of a Hive user-defined function (UDF) definition.
 // Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/UserDefinedFunction
 type UserDefinedFunction struct {
@@ -17861,6 +18415,82 @@ func (s *UserDefinedFunctionInput) SetOwnerType(v string) *UserDefinedFunctionIn
 // SetResourceUris sets the ResourceUris field's value.
 func (s *UserDefinedFunctionInput) SetResourceUris(v []*ResourceUri) *UserDefinedFunctionInput {
 	s.ResourceUris = v
+	return s
+}
+
+// A classifier for XML content.
+// Please also see https://docs.aws.amazon.com/goto/WebAPI/glue-2017-03-31/XMLClassifier
+type XMLClassifier struct {
+	_ struct{} `type:"structure"`
+
+	// An identifier of the data format that the classifier matches.
+	//
+	// Classification is a required field
+	Classification *string `type:"string" required:"true"`
+
+	// The time this classifier was registered.
+	CreationTime *time.Time `type:"timestamp" timestampFormat:"unix"`
+
+	// The time this classifier was last updated.
+	LastUpdated *time.Time `type:"timestamp" timestampFormat:"unix"`
+
+	// The name of the classifier.
+	//
+	// Name is a required field
+	Name *string `min:"1" type:"string" required:"true"`
+
+	// The XML tag designating the element that contains each record in an XML document
+	// being parsed. Note that this cannot be an empty element. It must contain
+	// child elements representing fields in the record.
+	RowTag *string `type:"string"`
+
+	// The version of this classifier.
+	Version *int64 `type:"long"`
+}
+
+// String returns the string representation
+func (s XMLClassifier) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s XMLClassifier) GoString() string {
+	return s.String()
+}
+
+// SetClassification sets the Classification field's value.
+func (s *XMLClassifier) SetClassification(v string) *XMLClassifier {
+	s.Classification = &v
+	return s
+}
+
+// SetCreationTime sets the CreationTime field's value.
+func (s *XMLClassifier) SetCreationTime(v time.Time) *XMLClassifier {
+	s.CreationTime = &v
+	return s
+}
+
+// SetLastUpdated sets the LastUpdated field's value.
+func (s *XMLClassifier) SetLastUpdated(v time.Time) *XMLClassifier {
+	s.LastUpdated = &v
+	return s
+}
+
+// SetName sets the Name field's value.
+func (s *XMLClassifier) SetName(v string) *XMLClassifier {
+	s.Name = &v
+	return s
+}
+
+// SetRowTag sets the RowTag field's value.
+func (s *XMLClassifier) SetRowTag(v string) *XMLClassifier {
+	s.RowTag = &v
+	return s
+}
+
+// SetVersion sets the Version field's value.
+func (s *XMLClassifier) SetVersion(v int64) *XMLClassifier {
+	s.Version = &v
 	return s
 }
 

@@ -8,13 +8,15 @@ import (
 	"os"
 	"runtime"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/moby/tool/src/initrd"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
-	bios       = "linuxkit/mkimage-iso-bios:165b051322578cb0c2a4f16253b20f7d2797a502"
-	efi        = "linuxkit/mkimage-iso-efi:dc12bc6827f84334b02d1c70599acf80b840c126"
+	isoBios    = "linuxkit/mkimage-iso-bios:165b051322578cb0c2a4f16253b20f7d2797a502"
+	isoEfi     = "linuxkit/mkimage-iso-efi:43592c9b316b036338c4db9f90aada37b48415dc"
+	rawBios    = "linuxkit/mkimage-raw-bios:eac4dcb78f837618e7e009060146977c2adabe19"
+	rawEfi     = "linuxkit/mkimage-raw-efi:167441e223c1c131dac349deb67966d400066e04"
 	gcp        = "linuxkit/mkimage-gcp:d1883809d212ce048f60beb0308a4d2b14c256af"
 	vhd        = "linuxkit/mkimage-vhd:2a31f2bc91c1d247160570bd17868075e6c0009a"
 	vmdk       = "linuxkit/mkimage-vmdk:df02a4fabd87a82209fbbacebde58c4440d2daf0"
@@ -45,20 +47,42 @@ var outFuns = map[string]func(string, []byte, int) error{
 		return nil
 	},
 	"iso-bios": func(base string, image []byte, size int) error {
-		err := outputIso(bios, base+".iso", image)
+		err := outputIso(isoBios, base+".iso", image)
 		if err != nil {
 			return fmt.Errorf("Error writing iso-bios output: %v", err)
 		}
 		return nil
 	},
 	"iso-efi": func(base string, image []byte, size int) error {
-		err := outputIso(efi, base+"-efi.iso", image)
+		err := outputIso(isoEfi, base+"-efi.iso", image)
 		if err != nil {
 			return fmt.Errorf("Error writing iso-efi output: %v", err)
 		}
 		return nil
 	},
-	"raw": func(base string, image []byte, size int) error {
+	"raw-bios": func(base string, image []byte, size int) error {
+		kernel, initrd, cmdline, err := tarToInitrd(image)
+		if err != nil {
+			return fmt.Errorf("Error converting to initrd: %v", err)
+		}
+		err = outputImg(rawBios, base+"-bios.img", kernel, initrd, cmdline)
+		if err != nil {
+			return fmt.Errorf("Error writing raw-bios output: %v", err)
+		}
+		return nil
+	},
+	"raw-efi": func(base string, image []byte, size int) error {
+		kernel, initrd, cmdline, err := tarToInitrd(image)
+		if err != nil {
+			return fmt.Errorf("Error converting to initrd: %v", err)
+		}
+		err = outputImg(rawEfi, base+"-efi.img", kernel, initrd, cmdline)
+		if err != nil {
+			return fmt.Errorf("Error writing raw-efi output: %v", err)
+		}
+		return nil
+	},
+	"aws": func(base string, image []byte, size int) error {
 		filename := base + ".raw"
 		log.Infof("  %s", filename)
 		kernel, initrd, cmdline, err := tarToInitrd(image)
@@ -82,7 +106,7 @@ var outFuns = map[string]func(string, []byte, int) error{
 		}
 		return nil
 	},
-	"qcow2": func(base string, image []byte, size int) error {
+	"qcow2-bios": func(base string, image []byte, size int) error {
 		filename := base + ".qcow2"
 		log.Infof("  %s", filename)
 		kernel, initrd, cmdline, err := tarToInitrd(image)
@@ -141,8 +165,8 @@ var outFuns = map[string]func(string, []byte, int) error{
 }
 
 var prereq = map[string]string{
-	"raw":   "mkimage",
-	"qcow2": "mkimage",
+	"aws":        "mkimage",
+	"qcow2-bios": "mkimage",
 }
 
 func ensurePrereq(out string) error {
@@ -246,11 +270,7 @@ func tarInitrdKernel(kernel, initrd []byte, cmdline string) (*bytes.Buffer, erro
 	if err != nil {
 		return buf, err
 	}
-	err = tw.Close()
-	if err != nil {
-		return buf, err
-	}
-	return buf, nil
+	return buf, tw.Close()
 }
 
 func outputImg(image, filename string, kernel []byte, initrd []byte, cmdline string) error {
@@ -266,25 +286,6 @@ func outputImg(image, filename string, kernel []byte, initrd []byte, cmdline str
 	}
 	defer output.Close()
 	return dockerRun(buf, output, true, image, cmdline)
-}
-
-// this should replace the other version for types that can specify a size
-func outputImgSize(image, filename string, kernel []byte, initrd []byte, cmdline string, size int) error {
-	log.Debugf("output img: %s %s size %d", image, filename, size)
-	log.Infof("  %s", filename)
-	buf, err := tarInitrdKernel(kernel, initrd, cmdline)
-	if err != nil {
-		return err
-	}
-	output, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer output.Close()
-	if size == 0 {
-		return dockerRun(buf, output, true, image)
-	}
-	return dockerRun(buf, output, true, image, fmt.Sprintf("%dM", size))
 }
 
 func outputIso(image, filename string, filesystem []byte) error {
@@ -320,11 +321,7 @@ func outputKernelInitrd(base string, kernel []byte, initrd []byte, cmdline strin
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(base+"-cmdline", []byte(cmdline), os.FileMode(0644))
-	if err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(base+"-cmdline", []byte(cmdline), os.FileMode(0644))
 }
 
 func outputKernelInitrdTarball(base string, kernel []byte, initrd []byte, cmdline string) error {

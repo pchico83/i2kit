@@ -21,10 +21,10 @@ func NewDestroy(k8path string, awsConfig *aws.Config) *cobra.Command {
 				return err
 			}
 			svc := cloudformation.New(session.New(), awsConfig)
-			deploymentName := deployment.GetName()
+			deploymentName := deployment.Metadata.Name
 			response, err := svc.DescribeStacks(
 				&cloudformation.DescribeStacksInput{
-					StackName: aws.String(deploymentName),
+					StackName: aws.String(deployment.Metadata.Name),
 				},
 			)
 			if err != nil {

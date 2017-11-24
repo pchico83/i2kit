@@ -1,12 +1,8 @@
 hash: e05e76dceac9f722635d02d5c7a7e1db34c034ecb9cda3612f78dacb7e006f70
-updated: 2017-10-24T14:19:42.788852827+02:00
+updated: 2017-11-24T10:32:31.862568285+01:00
 imports:
-- name: github.com/agl/ed25519
-  version: 5312a61534124124185d41f09206b9fef1d88403
-  subpackages:
-  - edwards25519
 - name: github.com/aws/aws-sdk-go
-  version: e83347f2c76da594a7a8adbf7324939b6c489e6b
+  version: 9365c0c6f32778b59eb41491629d37721658efb8
   subpackages:
   - aws
   - aws/awserr
@@ -32,240 +28,49 @@ imports:
   - private/protocol/xml/xmlutil
   - service/cloudformation
   - service/sts
-- name: github.com/containerd/containerd
-  version: 04659d94051126f4fe4fcddf068550db447ff5a0
-  subpackages:
-  - reference
 - name: github.com/crewjam/go-cloudformation
   version: d3183a4759da92da1e846521444ad08216b7f20e
-- name: github.com/docker/distribution
-  version: 3800056b8832cf6075e78b282ac010131d8687bc
-  subpackages:
-  - digestset
-  - reference
-  - registry/api/errcode
-  - registry/api/v2
-  - registry/client
-  - registry/client/auth
-  - registry/client/auth/challenge
-  - registry/client/transport
-  - registry/storage/cache
-  - registry/storage/cache/memory
-  - uuid
-- name: github.com/docker/docker
-  version: 7848b8beb9d38a98a78b75f78e05f8d2255f9dfe
-  subpackages:
-  - api
-  - api/types
-  - api/types/blkiodev
-  - api/types/container
-  - api/types/events
-  - api/types/filters
-  - api/types/image
-  - api/types/mount
-  - api/types/network
-  - api/types/registry
-  - api/types/strslice
-  - api/types/swarm
-  - api/types/swarm/runtime
-  - api/types/time
-  - api/types/versions
-  - api/types/volume
-  - client
-- name: github.com/docker/go
-  version: d30aec9fd63c35133f8f79c3412ad91a3b08be06
-  subpackages:
-  - canonical/json
-- name: github.com/docker/go-connections
-  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
-  subpackages:
-  - nat
-  - sockets
-  - tlsconfig
-- name: github.com/docker/go-units
-  version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
-- name: github.com/docker/notary
-  version: 5d55a30c1bec010a8c6df4c09889acfb4e0a7942
-  subpackages:
-  - client
-  - client/changelist
-  - cryptoservice
-  - storage
-  - trustmanager
-  - trustmanager/yubikey
-  - trustpinning
-  - tuf
-  - tuf/data
-  - tuf/signed
-  - tuf/utils
-  - tuf/validation
-- name: github.com/emicklei/go-restful
-  version: ff4f55a206334ef123e4f79bbf348980da81ca46
-  subpackages:
-  - log
-- name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-ini/ini
-  version: f384f410798cbe7cdce40eec40b79ed32bb4f1ad
-- name: github.com/go-openapi/jsonpointer
-  version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
-- name: github.com/go-openapi/jsonreference
-  version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
-- name: github.com/go-openapi/spec
-  version: 7abd5745472fff5eb3685386d5fb8bf38683154d
-- name: github.com/go-openapi/swag
-  version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
-- name: github.com/gogo/protobuf
-  version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
-  subpackages:
-  - proto
-  - sortkeys
-- name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
-- name: github.com/google/gofuzz
-  version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
-- name: github.com/gorilla/context
-  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
-- name: github.com/gorilla/mux
-  version: 7625a85c14e615274a4ee4bc8654f72310a563e4
+  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
-- name: github.com/mailru/easyjson
-  version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
-  subpackages:
-  - buffer
-  - jlexer
-  - jwriter
-- name: github.com/Microsoft/go-winio
-  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
-- name: github.com/miekg/pkcs11
-  version: b0a4dd3f1df2065883a1a0a9045fb893319d3c67
+  version: dd801d4f4ce7ac746e7e7b4489d2fa600b3b096b
 - name: github.com/moby/tool
-  version: 57c6720356a8ede6758d60c5d66752d8e19b9ecf
+  version: 63a5dedd28a459900eba56dd191edaeb688cfdf4
   subpackages:
-  - src/initrd
   - src/moby
-  - src/pad4
-- name: github.com/opencontainers/go-digest
-  version: 279bed98673dd5bef374d3b6e4b09e2af76183bf
-- name: github.com/opencontainers/image-spec
-  version: 7c889fafd04a893f5c5f50b7ab9963d5d64e5242
-  subpackages:
-  - specs-go
-  - specs-go/v1
-- name: github.com/opencontainers/runtime-spec
-  version: a5276ae66a35b40f604a3759b90425ada14f5ed7
-  subpackages:
-  - specs-go
-- name: github.com/pkg/errors
-  version: f15c970de5b76fac0b59abb32d62c17cc7bed265
-- name: github.com/PuerkitoBio/purell
-  version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
-- name: github.com/PuerkitoBio/urlesc
-  version: 5bd2802263f21d8788851d5305584c82a5c75d7e
-- name: github.com/sirupsen/logrus
-  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: github.com/Sirupsen/logrus
-  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
+  version: 95cd2b9c79aa5e72ab0bc69b7ccc2be15bf850f6
   repo: git@github.com:/sirupsen/logrus
   vcs: git
+- name: github.com/sirupsen/logrus
+  version: 95cd2b9c79aa5e72ab0bc69b7ccc2be15bf850f6
 - name: github.com/spf13/cobra
-  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
+  version: 1be1d2841c773c01bee8289f55f7463b6e2c2539
 - name: github.com/spf13/pflag
-  version: 97afa5e7ca8a08a383cb259e06636b5e2cc7897f
-- name: github.com/surma/gocpio
-  version: fcb68777e7dc4ea43ffce871b552c0d073c17495
-- name: github.com/xeipuuv/gojsonpointer
-  version: 6fe8760cad3569743d51ddbb243b26f8456742dc
-- name: github.com/xeipuuv/gojsonreference
-  version: e02fc20de94c78484cd5ffb007f8af96be030a45
-- name: github.com/xeipuuv/gojsonschema
-  version: 3f523f4c14b6e925da10475eb0447c2f28614aac
+  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
 - name: golang.org/x/crypto
-  version: 2509b142fb2b797aa7587dad548f113b2c0f20ce
+  version: b080dc9a8c480b08e698fb1219160d598526310f
   subpackages:
-  - pbkdf2
   - ssh/terminal
-- name: golang.org/x/net
-  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
-  subpackages:
-  - context
-  - context/ctxhttp
-  - http2
-  - http2/hpack
-  - idna
-  - lex/httplex
-  - proxy
 - name: golang.org/x/sys
-  version: a1a1f1746d156bbc9954f29134b20ed4ce2752f1
+  version: a13efeb2fd213cf4be7227992aa54519af3b2ac0
   subpackages:
   - unix
   - windows
-- name: golang.org/x/text
-  version: b19bf474d317b857955b12035d2c5acb57ce8b01
-  subpackages:
-  - cases
-  - internal
-  - internal/tag
-  - language
-  - runes
-  - secure/bidirule
-  - secure/precis
-  - transform
-  - unicode/bidi
-  - unicode/norm
-  - width
-- name: gopkg.in/inf.v0
-  version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: 287cf08546ab5e7e37d55a84f7ed3fd1db036de5
 - name: k8s.io/api
-  version: 409c3b2393cd3359f275bd8b883b4d9c5aec41f6
+  version: 218912509d74a117d05a718bb926d0948e531c20
   subpackages:
-  - apps/v1beta1
-  - core/v1
   - extensions/v1beta1
 - name: k8s.io/apimachinery
   version: e9a29eff7d472df0f7da9ead5ab59b74e74a07ec
   subpackages:
-  - pkg/api/resource
-  - pkg/apis/meta/v1
-  - pkg/conversion
-  - pkg/conversion/queryparams
-  - pkg/fields
-  - pkg/labels
-  - pkg/runtime
-  - pkg/runtime/schema
-  - pkg/selection
-  - pkg/types
-  - pkg/util/errors
-  - pkg/util/intstr
-  - pkg/util/net
-  - pkg/util/runtime
-  - pkg/util/sets
-  - pkg/util/validation
-  - pkg/util/validation/field
-  - pkg/util/wait
   - pkg/util/yaml
-  - pkg/watch
-  - third_party/forked/golang/reflect
-- name: k8s.io/kube-openapi
-  version: 868f2f29720b192240e18284659231b440f9cda5
-  subpackages:
-  - pkg/common
 testImports:
-- name: github.com/davecgh/go-spew
-  version: 782f4967f2dc4564575ca782fe2d04090b5faca8
-  subpackages:
-  - spew
-- name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
-  subpackages:
-  - difflib
 - name: github.com/stretchr/testify
   version: f6abca593680b2315d2075e0f5e2a9751e3f431a
   subpackages:
-  - assert
   - require
