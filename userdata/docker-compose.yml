@@ -1,0 +1,7 @@
+version: "3"
+services:
+  userdata:
+    image: i2kit/userdata
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
