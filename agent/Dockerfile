@@ -1,5 +1,5 @@
 FROM golang:1.9.0-alpine3.6 as builder
-ENV SRC_DIR=/go/src/bitbucket.org/riberaproject/agent
+ENV SRC_DIR=/go/src/github.com/pchico83/i2kit/agent
 WORKDIR $SRC_DIR
 ADD . $SRC_DIR
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o agent main.go
@@ -11,5 +11,5 @@ RUN apk update && \
 RUN pip install 'docker-compose==1.17.1'
 
 WORKDIR /root/i2kit
-COPY --from=builder /go/src/bitbucket.org/riberaproject/agent/agent .
+COPY --from=builder /go/src/github.com/pchico83/i2kit/agent/agent .
 CMD ["./agent"]

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"bitbucket.org/riberaproject/cli/cmd"
+	"github.com/pchico83/i2kit/cli/cmd"
 	"github.com/spf13/cobra"
 )
 

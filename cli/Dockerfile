@@ -1,5 +1,5 @@
 FROM golang:1.9.0-alpine3.6 as builder
-ENV SRC_DIR=/go/src/bitbucket.org/riberaproject/cli
+ENV SRC_DIR=/go/src/github.com/pchico83/i2kit/cli/
 WORKDIR $SRC_DIR
 ADD . $SRC_DIR
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /usr/local/bin/i2kit
