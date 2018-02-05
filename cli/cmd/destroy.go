@@ -21,7 +21,11 @@ func Destroy() *cobra.Command {
 			if err := initManifest(file); err != nil {
 				return err
 			}
-			s, err := service.Read(file)
+			sYml, err := service.ReadYml(file)
+			if err != nil {
+				return err
+			}
+			s, err := service.CreateService(sYml)
 			if err != nil {
 				return err
 			}

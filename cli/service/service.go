@@ -29,16 +29,3 @@ type EnvVar struct {
 	Name  string
 	Value string
 }
-
-//Read returns a Service structure given a path to a i2kit.yml file
-func Read(path string) (*Service, error) {
-	sYml, err := readYml(path)
-	if err != nil {
-		return nil, err
-	}
-	s, err := createService(sYml)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
-}
