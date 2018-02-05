@@ -1,5 +1,9 @@
 package service
 
+import (
+	"io"
+)
+
 //Service represents a i2kit.yml file
 type Service struct {
 	Name       string
@@ -31,8 +35,8 @@ type EnvVar struct {
 }
 
 //Read returns a Service structure given a path to a i2kit.yml file
-func Read(path string) (*Service, error) {
-	sYml, err := readYml(path)
+func Read(reader io.Reader) (*Service, error) {
+	sYml, err := readYml(reader)
 	if err != nil {
 		return nil, err
 	}

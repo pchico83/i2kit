@@ -3,6 +3,7 @@ package compose
 import (
 	"encoding/base64"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,12 @@ import (
 )
 
 func TestE2E(t *testing.T) {
-	service, err := service.Read("./examples/i2kit.yml")
+	reader, err := os.Open("./examples/i2kit.yml")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	service, err := service.Read(reader)
 	require.NoError(t, err)
 	generatedEncodedCompose, err := Create(service, "staging.i2kit.com")
 	composeBytes, err := ioutil.ReadFile("./examples/compose.yml")
