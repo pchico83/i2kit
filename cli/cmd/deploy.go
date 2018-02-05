@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"bitbucket.org/riberaproject/cli/aws"
-	"bitbucket.org/riberaproject/cli/service"
+	"github.com/pchico83/i2kit/cli/aws"
+	"github.com/pchico83/i2kit/cli/service"
 	"github.com/spf13/cobra"
 )
 

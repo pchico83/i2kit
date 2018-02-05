@@ -7,10 +7,10 @@ import (
 	"os"
 	"strconv"
 
-	"bitbucket.org/riberaproject/cli/compose"
-	"bitbucket.org/riberaproject/cli/service"
 	gocf "github.com/crewjam/go-cloudformation"
 	"github.com/google/uuid"
+	"github.com/pchico83/i2kit/cli/compose"
+	"github.com/pchico83/i2kit/cli/service"
 )
 
 var amisPerRegion = map[string]string{

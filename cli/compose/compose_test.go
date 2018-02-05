@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"bitbucket.org/riberaproject/cli/service"
+	"github.com/pchico83/i2kit/cli/service"
 )
 
 func TestE2E(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"bitbucket.org/riberaproject/cli/service"
+	"github.com/pchico83/i2kit/cli/service"
 
 	yaml "gopkg.in/yaml.v2"
 )
