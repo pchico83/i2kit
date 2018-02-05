@@ -21,7 +21,8 @@ type containerYml struct {
 	Environment []*string
 }
 
-func readYml(path string) (*serviceYml, error) {
+//ReadYml reads a yml file
+func ReadYml(path string) (*serviceYml, error) {
 	ymlBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -34,7 +35,8 @@ func readYml(path string) (*serviceYml, error) {
 	return &result, nil
 }
 
-func createService(s *serviceYml) (*Service, error) {
+//CreateService creates a service object given its string
+func CreateService(s *serviceYml) (*Service, error) {
 	result := Service{
 		Name:       s.Name,
 		Replicas:   s.Replicas,
