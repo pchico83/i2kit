@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
 
@@ -21,13 +22,14 @@ type containerYml struct {
 	Environment []*string
 }
 
-func readYml(path string) (*serviceYml, error) {
-	ymlBytes, err := ioutil.ReadFile(path)
+func readYml(reader io.Reader) (*serviceYml, error) {
+	readBytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
+
 	var result serviceYml
-	err = yaml.Unmarshal(ymlBytes, &result)
+	err = yaml.Unmarshal(readBytes, &result)
 	if err != nil {
 		return nil, err
 	}

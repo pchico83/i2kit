@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/pchico83/i2kit/cli/aws"
 	"github.com/pchico83/i2kit/cli/service"
 	"github.com/spf13/cobra"
@@ -21,7 +23,13 @@ func Destroy() *cobra.Command {
 			if err := initManifest(file); err != nil {
 				return err
 			}
-			s, err := service.Read(file)
+
+			reader, err := os.Open(file)
+			if err != nil {
+				return err
+			}
+
+			s, err := service.Read(reader)
 			if err != nil {
 				return err
 			}
