@@ -3,5 +3,3 @@
 
 Dockerfile
 docker-compose.yml
-aws-credentials
-glide*

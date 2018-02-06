@@ -1,15 +1,14 @@
-FROM golang:1.9.0-alpine3.6 as builder
-ENV SRC_DIR=/go/src/github.com/pchico83/i2kit/agent
-WORKDIR $SRC_DIR
-ADD . $SRC_DIR
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o agent main.go
-
 FROM alpine:3.6
+
+WORKDIR /root/agent
+
 RUN apk update && \
     apk add --no-cache \
-        py-pip
-RUN pip install 'docker-compose==1.17.1'
+        py-pip \
+        coreutils
 
-WORKDIR /root/i2kit
-COPY --from=builder /go/src/github.com/pchico83/i2kit/agent/agent .
-CMD ["./agent"]
+RUN pip install 'docker-compose==1.17.1'
+RUN pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+
+COPY agent.sh .
+CMD ["./agent.sh"]

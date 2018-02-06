@@ -1,3 +1,0 @@
-package: bitbucket.org/riberaproject/agent
-import:
-- package: github.com/sirupsen/logrus
