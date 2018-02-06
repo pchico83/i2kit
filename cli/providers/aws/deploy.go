@@ -3,9 +3,9 @@ package aws
 import (
 	"fmt"
 
-	"github.com/pchico83/i2kit/cli/aws/cf"
-	"github.com/pchico83/i2kit/cli/aws/elb"
-	"github.com/pchico83/i2kit/cli/service"
+	"github.com/pchico83/i2kit/cli/providers/aws/cf"
+	"github.com/pchico83/i2kit/cli/providers/aws/elb"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 
 	"github.com/aws/aws-sdk-go/aws"
 	log "github.com/sirupsen/logrus"

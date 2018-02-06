@@ -3,8 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/pchico83/i2kit/cli/aws"
-	"github.com/pchico83/i2kit/cli/service"
+	"github.com/pchico83/i2kit/cli/providers/aws"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,7 @@ func Destroy() *cobra.Command {
 			return aws.Destroy(s, space, config)
 		},
 	}
-	cmd.Flags().StringVarP(&file, "file", "f", "i2kit.yml", "Yml file to be deployed")
+	cmd.Flags().StringVarP(&file, "file", "f", "service.yml", "Service yml file to be deployed")
 	cmd.Flags().StringVarP(&space, "space", "s", "", "subdomains for dns search configuration")
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "True to fake i2kit deployments")
 	return cmd

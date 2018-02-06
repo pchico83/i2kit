@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/pchico83/i2kit/cli/service"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 
 	yaml "gopkg.in/yaml.v2"
 )
