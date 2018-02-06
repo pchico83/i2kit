@@ -1,7 +1,7 @@
 version: "3"
 services:
   amis:
-    image: i2kit/amis
+    image: riberaproject/linuxkit
     build: .
     environment:
       - AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws-credentials
