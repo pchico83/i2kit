@@ -1,10 +1,12 @@
 version: "3"
 services:
   agent:
-    image: i2kit/agent
+    image: riberaproject/agent
     build: .
     environment:
+      - CONFIG
       - COMPOSE
+      - STACK
+      - REGION
     volumes:
-      - ~/.docker/config.json:/root/.docker/config.json
       - /var/run/docker.sock:/var/run/docker.sock
