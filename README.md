@@ -41,8 +41,8 @@ Extra configuration:
 Execute commands by running:
 
 ```
-i2kit deploy -f i2kit.yml
-i2kit destroy -f i2kit.yml
+i2kit deploy -f service.yml
+i2kit destroy -f service.yml
 ```
 
-where `i2kit.yml` is the path to your i2kit Manifest file.
+where `service.yml` is the path to your i2kit Service Manifest.

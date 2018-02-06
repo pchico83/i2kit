@@ -9,8 +9,8 @@ import (
 
 	gocf "github.com/crewjam/go-cloudformation"
 	"github.com/google/uuid"
-	"github.com/pchico83/i2kit/cli/compose"
-	"github.com/pchico83/i2kit/cli/service"
+	"github.com/pchico83/i2kit/cli/schemas/compose"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
 var amisPerRegion = map[string]string{

@@ -8,11 +8,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pchico83/i2kit/cli/service"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
 func TestE2E(t *testing.T) {
-	reader, err := os.Open("./examples/i2kit.yml")
+	reader, err := os.Open("./examples/service.yml")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

@@ -4,14 +4,14 @@ import (
 	"io"
 )
 
-//Service represents a i2kit.yml file
+//Service represents a service.yml file
 type Service struct {
 	Name       string
 	Replicas   int
 	Containers map[string]*Container
 }
 
-//Container represents a container in a i2kit.yml file
+//Container represents a container in a service.yml file
 type Container struct {
 	Image       string
 	Command     string
@@ -34,7 +34,7 @@ type EnvVar struct {
 	Value string
 }
 
-//Read returns a Service structure given a path to a i2kit.yml file
+//Read returns a Service structure given a path to a service.yml file
 func Read(reader io.Reader) (*Service, error) {
 	sYml, err := readYml(reader)
 	if err != nil {
