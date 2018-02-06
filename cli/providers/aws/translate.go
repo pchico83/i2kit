@@ -4,12 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	gocf "github.com/crewjam/go-cloudformation"
 	"github.com/google/uuid"
 	"github.com/pchico83/i2kit/cli/schemas/compose"
+	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
@@ -18,26 +18,20 @@ var amisPerRegion = map[string]string{
 }
 
 // Translate an i2kit service to a AWS CloudFormation template
-func Translate(s *service.Service, space string, signal string) (string, error) {
-	region := os.Getenv("I2KIT_REGION")
-	ami, ok := amisPerRegion[region]
+func Translate(s *service.Service, e *environment.Environment, signal string) (string, error) {
+	ami, ok := amisPerRegion[e.Provider.Region]
 	if !ok {
-		return "", fmt.Errorf("Region'%s' is not supported", region)
+		return "", fmt.Errorf("Region'%s' is not supported", e.Provider.Region)
 	}
 	t := gocf.NewTemplate()
-	hostedZone := os.Getenv("I2KIT_HOSTED_ZONE")
-	err := loadASG(t, s, space, ami, hostedZone, signal)
+	err := loadASG(t, s, e, ami, signal)
 	if err != nil {
 		return "", err
 	}
-	resourceName := s.Name
-	if space != "" {
-		resourceName = fmt.Sprintf("%s-%s", s.Name, space)
-	}
-	loadELB(t, s, resourceName)
-	loadIAM(t, resourceName)
-	loadLogGroup(t, resourceName)
-	loadRoute53(t, s.Name, space, hostedZone)
+	loadELB(t, s, e)
+	loadIAM(t, s, e)
+	loadLogGroup(t, s, e)
+	loadRoute53(t, s, e)
 	marshalledTemplate := []byte("")
 	if marshalledTemplate, err = json.Marshal(t); err != nil {
 		return "", err
@@ -45,16 +39,8 @@ func Translate(s *service.Service, space string, signal string) (string, error) 
 	return string(marshalledTemplate), nil
 }
 
-func loadASG(t *gocf.Template, s *service.Service, space string, ami, hostedZone, signal string) error {
-	var domain string
-	if hostedZone != "" {
-		if space != "" {
-			domain = fmt.Sprintf("%s.%s", space, hostedZone)
-		} else {
-			domain = hostedZone
-		}
-		domain = domain[:len(domain)-1]
-	}
+func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami, signal string) error {
+	domain := e.Provider.HostedZone[:len(e.Provider.HostedZone)-1]
 	encodedCompose, err := compose.Create(s, domain)
 	if err != nil {
 		return err
@@ -66,7 +52,7 @@ func loadASG(t *gocf.Template, s *service.Service, space string, ami, hostedZone
 		LoadBalancerNames:       gocf.StringList(gocf.Ref("ELB")),
 		MaxSize:                 gocf.String(replicas),
 		MinSize:                 gocf.String(replicas),
-		VPCZoneIdentifier:       gocf.StringList(gocf.String(os.Getenv("I2KIT_SUBNET"))),
+		VPCZoneIdentifier:       gocf.StringList(gocf.String(e.Provider.Subnet)),
 	}
 	updatePolicy := &gocf.UpdatePolicy{
 		AutoScalingRollingUpdate: &gocf.UpdatePolicyAutoScalingRollingUpdate{
@@ -84,28 +70,19 @@ func loadASG(t *gocf.Template, s *service.Service, space string, ami, hostedZone
 	}
 	asgResource := &gocf.Resource{Properties: asg, UpdatePolicy: updatePolicy}
 	t.Resources["ASG"] = asgResource
-	instanceType := os.Getenv("I2KIT_INSTANCE_TYPE")
-	if instanceType == "" {
-		instanceType = "t2.micro"
-	}
-	containerName := s.Name
-	if space != "" {
-		containerName = fmt.Sprintf("%s-%s", s.Name, space)
-	}
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:            gocf.String(ami),
 		InstanceType:       gocf.String("t2.small"),
-		KeyName:            gocf.String(os.Getenv("I2KIT_KEYPAIR")),
-		SecurityGroups:     []string{os.Getenv("I2KIT_SECURITY_GROUP")},
+		KeyName:            gocf.String(e.Provider.Keypair),
+		SecurityGroups:     []string{e.Provider.SecurityGroup},
 		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
-		UserData:           gocf.String(userData(containerName, encodedCompose, signal)),
+		UserData:           gocf.String(userData(s.Name, encodedCompose, e, signal)),
 	}
 	t.AddResource("LaunchConfig", launchConfig)
 	return nil
 }
 
-func userData(containerName, encodedCompose, signal string) string {
-	region := os.Getenv("I2KIT_REGION")
+func userData(containerName, encodedCompose string, e *environment.Environment, signal string) string {
 	uniqueOperationID := uuid.New().String()
 	value := fmt.Sprintf(
 		`#!/bin/bash
@@ -114,7 +91,6 @@ set -e
 sudo docker run \
 	--name %s \
 	-e COMPOSE=%s \
-	-e CONFIG=%s \
 	-e UNIQUE_OPERATION_ID=%s \
 	-e STACK=%s \
 	-e REGION=%s \
@@ -127,17 +103,16 @@ sudo docker run \
 	riberaproject/agent`,
 		containerName,
 		encodedCompose,
-		os.Getenv("I2KIT_DOCKER_CONFIG"),
 		uniqueOperationID,
 		containerName,
-		region,
+		e.Provider.Region,
 		signal,
 		containerName,
 	)
 	return base64.StdEncoding.EncodeToString([]byte(value))
 }
 
-func loadELB(t *gocf.Template, s *service.Service, elbName string) {
+func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	instancePort := ""
 	listeners := gocf.ElasticLoadBalancingListenerList{}
 	for _, container := range s.Containers {
@@ -158,9 +133,9 @@ func loadELB(t *gocf.Template, s *service.Service, elbName string) {
 		return
 	}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
-		LoadBalancerName: gocf.String(elbName),
-		Subnets:          gocf.StringList(gocf.String(os.Getenv("I2KIT_SUBNET"))),
-		SecurityGroups:   []string{os.Getenv("I2KIT_SECURITY_GROUP")},
+		LoadBalancerName: gocf.String(s.Name),
+		Subnets:          gocf.StringList(gocf.String(e.Provider.Subnet)),
+		SecurityGroups:   []string{e.Provider.SecurityGroup},
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
 			HealthyThreshold:   gocf.String("2"),
 			Interval:           gocf.String("15"),
@@ -181,15 +156,15 @@ func loadELB(t *gocf.Template, s *service.Service, elbName string) {
 	t.AddResource("ELB", elb)
 }
 
-func loadIAM(t *gocf.Template, policyName string) {
+func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	policy := gocf.IAMPolicies{
-		PolicyName: gocf.String(policyName),
+		PolicyName: gocf.String(s.Name),
 		PolicyDocument: &map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": map[string]interface{}{
 				"Effect":   "Allow",
 				"Action":   []string{"logs:CreateLogStream", "logs:PutLogEvents"},
-				"Resource": fmt.Sprintf("arn:aws:logs:us-west-2:*:log-group:i2kit-%s:log-stream:%s-*", policyName, policyName),
+				"Resource": fmt.Sprintf("arn:aws:logs:us-west-2:*:log-group:i2kit-%s:log-stream:%s-*", s.Name, s.Name),
 			},
 		},
 	}
@@ -212,23 +187,18 @@ func loadIAM(t *gocf.Template, policyName string) {
 	t.AddResource("InstanceProfile", instanceProfile)
 }
 
-func loadLogGroup(t *gocf.Template, logGroupName string) {
+func loadLogGroup(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	logGroup := &gocf.LogsLogGroup{
-		LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s", logGroupName)),
+		LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s", s.Name)),
 		RetentionInDays: gocf.Integer(30),
 	}
 	t.AddResource("LogGroup", logGroup)
 }
 
-func loadRoute53(t *gocf.Template, name, space, hostedZone string) {
-	recordName := ""
-	if space == "" {
-		recordName = fmt.Sprintf("%s.%s", name, hostedZone)
-	} else {
-		recordName = fmt.Sprintf("%s.%s.%s", name, space, hostedZone)
-	}
+func loadRoute53(t *gocf.Template, s *service.Service, e *environment.Environment) {
+	recordName := fmt.Sprintf("%s.%s", s.Name, e.Provider.HostedZone)
 	recordSet := &gocf.Route53RecordSet{
-		HostedZoneName:  gocf.String(hostedZone),
+		HostedZoneName:  gocf.String(e.Provider.HostedZone),
 		Name:            gocf.String(recordName),
 		Type:            gocf.String("CNAME"),
 		TTL:             gocf.String("900"),

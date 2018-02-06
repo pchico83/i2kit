@@ -1,56 +1,46 @@
 package aws
 
 import (
-	"fmt"
-
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
+	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 
-	"github.com/aws/aws-sdk-go/aws"
 	log "github.com/sirupsen/logrus"
 )
 
 //Deploy deploys a AWS Cloud Formation stack
-func Deploy(s *service.Service, space string, config *aws.Config, dryRun bool) error {
-	stackName := s.Name
-	if space != "" {
-		stackName = fmt.Sprintf("%s-%s", s.Name, space)
-	}
+func Deploy(s *service.Service, e *environment.Environment) error {
 	consumed := 0
-	stack, err := cf.Get(stackName, config)
+	config, err := getAWSConfig(e)
+	if err != nil {
+		return err
+	}
+	stack, err := cf.Get(s.Name, config)
 	if err != nil {
 		return err
 	}
 	if stack != nil && *stack.StackStatus == "ROLLBACK_COMPLETE" {
-		if err = Destroy(s, space, config); err != nil {
+		if err = Destroy(s, e); err != nil {
 			return err
 		}
-		log.Infof("Destroying previous stack '%s' in 'ROLLBACK_COMPLETE' state...", stackName)
+		log.Infof("Destroying previous stack '%s' in 'ROLLBACK_COMPLETE' state...", s.Name)
 		stack = nil
 	}
 	var stackID string
 	var template string
 	if stack == nil {
-		template, err = Translate(s, space, "NO")
+		template, err = Translate(s, e, "NO")
 		if err != nil {
 			return err
 		}
-		if dryRun {
-			fmt.Println(template)
-			return nil
-		}
-		if stackID, err = cf.Create(stackName, template, config); err != nil {
+		if stackID, err = cf.Create(s.Name, template, config); err != nil {
 			return err
 		}
 	} else {
-		template, err = Translate(s, space, "YES")
+		template, err = Translate(s, e, "YES")
 		if err != nil {
 			return err
-		}
-		if dryRun {
-			fmt.Println(template)
-			return nil
 		}
 		stackID = *stack.StackId
 		consumed = cf.NumEvents(stackID, config)

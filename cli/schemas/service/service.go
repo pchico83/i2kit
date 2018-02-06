@@ -34,15 +34,16 @@ type EnvVar struct {
 	Value string
 }
 
-//Read returns a Service structure given a path to a service.yml file
+//Validate returns an error for invalid service.yml files
+func Validate(reader io.Reader) error {
+	return nil
+}
+
+//Read returns a Service structure given a reader to a service.yml file
 func Read(reader io.Reader) (*Service, error) {
 	sYml, err := readYml(reader)
 	if err != nil {
 		return nil, err
 	}
-	s, err := createService(sYml)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
+	return create(sYml)
 }

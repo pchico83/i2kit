@@ -1,0 +1,17 @@
+type: "//rec"
+optional:
+  provider:
+    type: "//rec"
+    required:
+      access_key: "//str"
+      secret_key: "//str"
+      region: "//str"
+      subnet: "//str"
+      security_group: "//str"
+      keypair: "//str"
+      hosted_zone: "//str"
+  docker:
+    type: "//rec"
+    required:
+      username: "//str"
+      password: "//str"
