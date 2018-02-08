@@ -36,7 +36,7 @@ func readYml(reader io.Reader) (*serviceYml, error) {
 	return &result, nil
 }
 
-func createService(s *serviceYml) (*Service, error) {
+func create(s *serviceYml) (*Service, error) {
 	result := Service{
 		Name:       s.Name,
 		Replicas:   s.Replicas,
