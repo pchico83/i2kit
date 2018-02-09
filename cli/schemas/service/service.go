@@ -84,7 +84,8 @@ func (p *Port) MarshalYAML() (interface{}, error) {
 	return buffer.String(), nil
 }
 
-//UnmarshalYAML converts a yaml to a Port
+//UnmarshalYAML parses the yaml element and sets the values of p; it will return an error if the parsing fails, or
+//if the format is incorrect
 func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var port string
 	if err := unmarshal(&port); err != nil {
@@ -122,8 +123,7 @@ func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-//MarshalYAML serializes p provided into a YAML document. The return value is a string;
-//It will fail if e has an empty name/
+//MarshalYAML serializes e into a YAML document. The return value is a string; It will fail if e has an empty name.
 func (e *EnvVar) MarshalYAML() (interface{}, error) {
 	if e.Name == "" {
 		return "", fmt.Errorf("missing values")
@@ -139,7 +139,8 @@ func (e *EnvVar) MarshalYAML() (interface{}, error) {
 	return buffer.String(), nil
 }
 
-//UnmarshalYAML converts a yaml to a EnvVar
+//UnmarshalYAML parses the yaml element and sets the values of e; it will return an error if the parsing fails, or
+//if the format is incorrect
 func (e *EnvVar) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var envvar string
 	if err := unmarshal(&envvar); err != nil {
