@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"fmt"
 	"io/ioutil"
 
-	yaml "gopkg.in/yaml.v2"
-
-	"github.com/pchico83/i2kit/cli/providers/aws"
+	"github.com/pchico83/i2kit/cli/providers"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 	"github.com/spf13/cobra"
+	yaml "gopkg.in/yaml.v2"
 )
 
 //Destroy destroys an i2kit service
@@ -46,14 +44,10 @@ func Destroy() *cobra.Command {
 				return err
 			}
 
-			if e.Provider == nil {
-				fmt.Println("Service dry-run destroyed succesfully. Did you define an 'environment.yml' file?")
-				return nil
-			}
-			return aws.Destroy(&s, &e)
+			return providers.Destroy(&s, &e)
 		},
 	}
-	cmd.Flags().StringVarP(&servicePath, "service", "s", "service.yml", "Service yml file to be deployed")
+	cmd.Flags().StringVarP(&servicePath, "service", "s", "service.yml", "Service yml file to be destroyed")
 	cmd.Flags().StringVarP(&environmentPath, "environment", "e", "environment.yml", "Environment yml file used for deployment")
 	return cmd
 }
