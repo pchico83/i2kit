@@ -25,7 +25,7 @@ type Service struct {
 	DNSSearch   []*string `yaml:"dns_search,omitempty"`
 }
 
-//Create returns a compose base64 encoded given a k8 deploymentt
+//Create returns a compose base64 encoded given a service object
 func Create(s *service.Service, domain string) (string, error) {
 	compose := &Compose{
 		Version:  "3.4",
