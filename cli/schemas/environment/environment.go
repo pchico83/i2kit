@@ -2,10 +2,6 @@ package environment
 
 import (
 	"fmt"
-	"io"
-	"io/ioutil"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
 //Environment represents a environment.yml file
@@ -32,11 +28,7 @@ type Docker struct {
 }
 
 //Validate returns an error for invalid environment.yml files
-func Validate(reader io.Reader) error {
-	e, err := Read(reader)
-	if err != nil {
-		return err
-	}
+func (e *Environment) Validate() error {
 	if e.Provider == nil {
 		return nil
 	}
@@ -63,20 +55,4 @@ func Validate(reader io.Reader) error {
 		return fmt.Errorf("'provider.hosted_zone' cannot be empty")
 	}
 	return nil
-}
-
-//Read returns a Environment structure given a reader to a env.yml file
-func Read(reader io.Reader) (*Environment, error) {
-	readBytes, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	var result Environment
-	err = yaml.Unmarshal(readBytes, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }

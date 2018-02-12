@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"io/ioutil"
+
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/pchico83/i2kit/cli/providers/aws"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
@@ -18,35 +20,29 @@ func Deploy() *cobra.Command {
 		Use:   "deploy",
 		Short: "Deploy an i2kit service",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			reader, err := os.Open(servicePath)
+			readBytes, err := ioutil.ReadFile(servicePath)
 			if err != nil {
 				return err
 			}
-			if err = service.Validate(reader); err != nil {
-				return err
-			}
-			reader, err = os.Open(servicePath)
+			var s service.Service
+			err = yaml.Unmarshal(readBytes, &s)
 			if err != nil {
 				return err
 			}
-			s, err := service.Read(reader)
-			if err != nil {
+			if err = s.Validate(); err != nil {
 				return err
 			}
 
-			reader, err = os.Open(environmentPath)
+			readBytes, err = ioutil.ReadFile(environmentPath)
 			if err != nil {
 				return err
 			}
-			if err = environment.Validate(reader); err != nil {
-				return err
-			}
-			reader, err = os.Open(environmentPath)
+			var e environment.Environment
+			err = yaml.Unmarshal(readBytes, &e)
 			if err != nil {
 				return err
 			}
-			e, err := environment.Read(reader)
-			if err != nil {
+			if err = e.Validate(); err != nil {
 				return err
 			}
 
@@ -54,7 +50,7 @@ func Deploy() *cobra.Command {
 				fmt.Println("Service dry-run deployed succesfully. Did you define an 'environment.yml' file?")
 				return nil
 			}
-			return aws.Deploy(s, e)
+			return aws.Deploy(&s, &e)
 		},
 	}
 	cmd.Flags().StringVarP(&servicePath, "service", "s", "service.yml", "Service yml file to be deployed")

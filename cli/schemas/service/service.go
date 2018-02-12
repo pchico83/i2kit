@@ -3,8 +3,6 @@ package service
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -41,24 +39,8 @@ type EnvVar struct {
 }
 
 //Validate returns an error for invalid service.yml files
-func Validate(reader io.Reader) error {
+func (s *Service) Validate() error {
 	return nil
-}
-
-//Read returns a Service structure given a reader to a service.yml file
-func Read(reader io.Reader) (*Service, error) {
-	readBytes, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	var result Service
-	err = yaml.Unmarshal(readBytes, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }
 
 //MarshalYAML serializes p provided into a YAML document. The return value is a string.
