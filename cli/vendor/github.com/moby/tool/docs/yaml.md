@@ -47,6 +47,10 @@ contain a kernel modules directory. `cmdline` specifies the kernel command line 
 To override the names, you can specify the kernel image name with `binary: bzImage` and the tar image
 with `tar: kernel.tar` or the empty string or `none` if you do not want to use a tarball at all.
 
+Kernel packages may also contain a cpio archive containing CPU microcode which needs prepending to
+the initrd. To select this option, recommended when booting on bare metal, add `ucode: intel-ucode.cpio`
+to the kernel section.
+
 ## `init`
 
 The `init` section is a list of images that are used for the `init` system and are unpacked directly
@@ -177,8 +181,9 @@ bind mounted into a container.
 - `rootfsPropagation` sets the rootfs propagation, eg `shared`, `slave` or (default) `private`.
 - `cgroupsPath` sets the path for cgroups.
 - `resources` sets cgroup resource limits as per the OCI spec.
-- `sysctl` sets a list of `sysctl` key value pairs that are set inside the container namespace.
+- `sysctl` sets a map of `sysctl` key value pairs that are set inside the container namespace.
 - `rmlimits` sets a list of `rlimit` values in the form `name,soft,hard`, eg `nofile,100,200`. You can use `unlimited` as a value too.
+- `annotations` sets a map of key value pairs as OCI metadata.
 
 There are experimental `userns`, `uidMappings` and `gidMappings` options for user namespaces but these are not yet supported, and may have
 permissions issues in use.
@@ -197,6 +202,7 @@ which specifies some actions to take place when the container is being started.
   - `peer` specifies the name of the other end when creating a `veth` interface. This end will remain in the root namespace, where it can be attached to a bridge. Specifying this implies `add: veth`.
 - `bindNS` specifies a namespace type and a path where the namespace from the container being created will be bound. This allows a namespace to be set up in an `onboot` container, and then
   using `net: path` for a `service` container to use that network namespace later.
+- `namespace` overrides the LinuxKit default containerd namespace to put the container in; only applicable to services.
 
 An example of using the `runtime` config to configure a network namespace with `wireguard` and then run `nginx` in that namespace is shown below:
 ```

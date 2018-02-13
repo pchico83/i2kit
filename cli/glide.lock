@@ -1,8 +1,8 @@
-hash: e05e76dceac9f722635d02d5c7a7e1db34c034ecb9cda3612f78dacb7e006f70
-updated: 2018-01-08T21:11:09.673335409+01:00
+hash: 1622c801e551eb55dadb6a06abb0ea9c2f62545f39a292556fcc020291affcc6
+updated: 2018-02-17T06:49:02.226827+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 3d07f149a788d58122fafcaa911d407168169ce0
+  version: b80dd2206c8eba8afd8930df003d126a7905d2d2
   subpackages:
   - aws
   - aws/awserr
@@ -20,6 +20,7 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/sdkrand
   - internal/shareddefaults
   - private/protocol
   - private/protocol/query
@@ -32,40 +33,27 @@ imports:
 - name: github.com/crewjam/go-cloudformation
   version: d3183a4759da92da1e846521444ad08216b7f20e
 - name: github.com/go-ini/ini
-  version: 32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a
+  version: 32e4be5f41bb918afb6e37c07426e2ddbcb6647e
 - name: github.com/google/uuid
   version: dec09d789f3dba190787f8b4454c7d3c936fed9e
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: dd801d4f4ce7ac746e7e7b4489d2fa600b3b096b
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
 - name: github.com/moby/tool
-  version: 1aca4eefa5fcfb2248e6b2e4ce7251a9a3b5a60a
+  version: 830794f3c07d172aba29b9333248ad05b27a1267
   subpackages:
   - src/moby
-- name: github.com/Sirupsen/logrus
-  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
-  repo: git@github.com:/sirupsen/logrus
-  vcs: git
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/cobra
-  version: b95ab734e27d33e0d8fbabf71ca990568d4e2020
+  version: be77323fc05148ef091e83b3866c0d47c8e74a8b
 - name: github.com/spf13/pflag
-  version: 4c012f6dcd9546820e378d0bdda4d8fc772cdfea
-- name: golang.org/x/crypto
-  version: 94eea52f7b742c7cbe0b03b22f0c4c8631ece122
-  subpackages:
-  - ssh/terminal
-- name: golang.org/x/sys
-  version: b8f5ef32195cae6470b728e8ca677f0dbed1a004
-  subpackages:
-  - unix
-  - windows
+  version: 6a877ebacf28c5fc79846f4fcd380a5d9872b997
 - name: gopkg.in/yaml.v2
-  version: 1244d3ce02e3e1c16820ada0bae506b6c479f106
+  version: d670f9405373e636a5a2765eea47fac0c9bc91a4
 - name: k8s.io/api
-  version: 57d7f151236665c12202a51c21bc939eb5d5ba91
+  version: b378c47b2dcba7f5c3ef97d8a5a0b3821ec6a001
   subpackages:
   - extensions/v1beta1
 - name: k8s.io/apimachinery

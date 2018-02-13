@@ -220,6 +220,7 @@
       "errors":[
         {"shape":"NoSuchTrafficPolicy"},
         {"shape":"InvalidInput"},
+        {"shape":"TooManyTrafficPolicyVersionsForCurrentPolicy"},
         {"shape":"ConcurrentModification"},
         {"shape":"InvalidTrafficPolicyDocument"}
       ]
@@ -1108,6 +1109,7 @@
         "ap-southeast-2",
         "ap-northeast-1",
         "ap-northeast-2",
+        "ap-northeast-3",
         "sa-east-1"
       ],
       "max":64,
@@ -3435,6 +3437,14 @@
       "error":{"httpStatusCode":400},
       "exception":true
     },
+    "TooManyTrafficPolicyVersionsForCurrentPolicy":{
+      "type":"structure",
+      "members":{
+        "message":{"shape":"ErrorMessage"}
+      },
+      "error":{"httpStatusCode":400},
+      "exception":true
+    },
     "TooManyVPCAssociationAuthorizations":{
       "type":"structure",
       "members":{
@@ -3735,6 +3745,7 @@
         "ap-south-1",
         "ap-northeast-1",
         "ap-northeast-2",
+        "ap-northeast-3",
         "sa-east-1",
         "ca-central-1",
         "cn-north-1"

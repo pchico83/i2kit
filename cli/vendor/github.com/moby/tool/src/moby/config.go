@@ -36,6 +36,7 @@ type KernelConfig struct {
 	Cmdline string  `yaml:"cmdline,omitempty" json:"cmdline,omitempty"`
 	Binary  string  `yaml:"binary,omitempty" json:"binary,omitempty"`
 	Tar     *string `yaml:"tar,omitempty" json:"tar,omitempty"`
+	UCode   *string `yaml:"ucode,omitempty" json:"ucode,omitempty"`
 
 	ref *reference.Spec
 }
@@ -69,6 +70,7 @@ type Image struct {
 
 // ImageConfig is the configuration part of Image, it is the subset
 // which is valid in a "org.mobyproject.config" label on an image.
+// Everything except Runtime and ref is used to build the OCI spec
 type ImageConfig struct {
 	Capabilities      *[]string               `yaml:"capabilities,omitempty" json:"capabilities,omitempty"`
 	Ambient           *[]string               `yaml:"ambient,omitempty" json:"ambient,omitempty"`
@@ -99,7 +101,9 @@ type ImageConfig struct {
 	Rlimits           *[]string               `yaml:"rlimits,omitempty" json:"rlimits,omitempty"`
 	UIDMappings       *[]specs.LinuxIDMapping `yaml:"uidMappings,omitempty" json:"uidMappings,omitempty"`
 	GIDMappings       *[]specs.LinuxIDMapping `yaml:"gidMappings,omitempty" json:"gidMappings,omitempty"`
-	Runtime           *Runtime                `yaml:"runtime,omitempty" json:"runtime,omitempty"`
+	Annotations       *map[string]string      `yaml:"annotations,omitempty" json:"annotations,omitempty"`
+
+	Runtime *Runtime `yaml:"runtime,omitempty" json:"runtime,omitempty"`
 
 	ref *reference.Spec
 }
@@ -111,6 +115,7 @@ type Runtime struct {
 	Mkdir      *[]string      `yaml:"mkdir,omitempty" json:"mkdir,omitempty"`
 	Interfaces *[]Interface   `yaml:"interfaces,omitempty,omitempty" json:"interfaces,omitempty"`
 	BindNS     Namespaces     `yaml:"bindNS,omitempty" json:"bindNS,omitempty"`
+	Namespace  *string        `yaml:"namespace,omitempty" json:"namespace,omitempty"`
 }
 
 // Namespaces is the type for configuring paths to bind namespaces
@@ -288,6 +293,9 @@ func AppendConfig(m0, m1 Moby) (Moby, error) {
 	}
 	if m1.Kernel.Tar != nil {
 		moby.Kernel.Tar = m1.Kernel.Tar
+	}
+	if m1.Kernel.UCode != nil {
+		moby.Kernel.UCode = m1.Kernel.UCode
 	}
 	if m1.Kernel.ref != nil {
 		moby.Kernel.ref = m1.Kernel.ref
@@ -581,6 +589,7 @@ func assignRuntime(v1, v2 *Runtime) Runtime {
 	runtimeMounts := assignBinds(v1.Mounts, v2.Mounts)
 	runtimeMkdir := assignStrings(v1.Mkdir, v2.Mkdir)
 	runtimeInterfaces := assignRuntimeInterfaceArray(v1.Interfaces, v2.Interfaces)
+	runtimeNamespace := assignString(v1.Namespace, v2.Namespace)
 	runtime := Runtime{
 		Cgroups:    &runtimeCgroups,
 		Mounts:     &runtimeMounts,
@@ -595,6 +604,7 @@ func assignRuntime(v1, v2 *Runtime) Runtime {
 			User:   assignStringPtr(v1.BindNS.User, v2.BindNS.User),
 			Uts:    assignStringPtr(v1.BindNS.Uts, v2.BindNS.Uts),
 		},
+		Namespace: &runtimeNamespace,
 	}
 	return runtime
 }
@@ -1021,6 +1031,7 @@ func ConfigInspectToOCI(yaml *Image, inspect types.ImageInspect, idMap map[strin
 
 	oci.Hostname = assignStringEmpty(label.Hostname, yaml.Hostname)
 	oci.Mounts = mountList
+	oci.Annotations = assignMaps(label.Annotations, yaml.Annotations)
 
 	resources := assignResources(label.Resources, yaml.Resources)
 

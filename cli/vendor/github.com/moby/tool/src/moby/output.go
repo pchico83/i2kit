@@ -14,35 +14,35 @@ import (
 )
 
 const (
-	isoBios    = "linuxkit/mkimage-iso-bios:165b051322578cb0c2a4f16253b20f7d2797a502"
-	isoEfi     = "linuxkit/mkimage-iso-efi:43592c9b316b036338c4db9f90aada37b48415dc"
-	rawBios    = "linuxkit/mkimage-raw-bios:eac4dcb78f837618e7e009060146977c2adabe19"
-	rawEfi     = "linuxkit/mkimage-raw-efi:167441e223c1c131dac349deb67966d400066e04"
-	gcp        = "linuxkit/mkimage-gcp:d1883809d212ce048f60beb0308a4d2b14c256af"
-	vhd        = "linuxkit/mkimage-vhd:2a31f2bc91c1d247160570bd17868075e6c0009a"
-	vmdk       = "linuxkit/mkimage-vmdk:df02a4fabd87a82209fbbacebde58c4440d2daf0"
-	dynamicvhd = "linuxkit/mkimage-dynamic-vhd:8553167d10c3e8d8603b2566d01bdc0cf5908fa5"
-	rpi3       = "linuxkit/mkimage-rpi3:0735656fff247ca978135e3aeb62864adc612180"
+	isoBios    = "linuxkit/mkimage-iso-bios:3315508388e62f7a599fa5c2d5318e78017ef553"
+	isoEfi     = "linuxkit/mkimage-iso-efi:6afada67184c7f68add9562375c662a4559eaa18"
+	rawBios    = "linuxkit/mkimage-raw-bios:31e7ef4ed982bad6ab9ff1f1185514492c325571"
+	rawEfi     = "linuxkit/mkimage-raw-efi:82db3af46d299be160590fb1633bbfebc891a927"
+	gcp        = "linuxkit/mkimage-gcp:df4f46fbcabcfef84af2ff34ff1ef7e7673bc329"
+	vhd        = "linuxkit/mkimage-vhd:796acfc515c22afb8f32d6b5c4bdd456b7f79d8c"
+	vmdk       = "linuxkit/mkimage-vmdk:deb9018d06dbb9da29464a4320187ce7e4ae1856"
+	dynamicvhd = "linuxkit/mkimage-dynamic-vhd:172fb196713a4aff677b88422026512600b1ca55"
+	rpi3       = "linuxkit/mkimage-rpi3:553c6c2d13b7d54f6b73b3b0c1c15f2e47ffb0df"
 )
 
 var outFuns = map[string]func(string, io.Reader, int) error{
 	"kernel+initrd": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, ucode, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
-		err = outputKernelInitrd(base, kernel, initrd, cmdline)
+		err = outputKernelInitrd(base, kernel, initrd, cmdline, ucode)
 		if err != nil {
 			return fmt.Errorf("Error writing kernel+initrd output: %v", err)
 		}
 		return nil
 	},
 	"tar-kernel-initrd": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, ucode, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
-		if err := outputKernelInitrdTarball(base, kernel, initrd, cmdline); err != nil {
+		if err := outputKernelInitrdTarball(base, kernel, initrd, cmdline, ucode); err != nil {
 			return fmt.Errorf("Error writing kernel+initrd tarball output: %v", err)
 		}
 		return nil
@@ -62,10 +62,11 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"raw-bios": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
+		// TODO: Handle ucode
 		err = outputImg(rawBios, base+"-bios.img", kernel, initrd, cmdline)
 		if err != nil {
 			return fmt.Errorf("Error writing raw-bios output: %v", err)
@@ -73,7 +74,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"raw-efi": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -86,7 +87,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 	"aws": func(base string, image io.Reader, size int) error {
 		filename := base + ".raw"
 		log.Infof("  %s", filename)
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -97,7 +98,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"gcp": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -110,10 +111,11 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 	"qcow2-bios": func(base string, image io.Reader, size int) error {
 		filename := base + ".qcow2"
 		log.Infof("  %s", filename)
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
+		// TODO: Handle ucode
 		err = outputLinuxKit("qcow2", filename, kernel, initrd, cmdline, size)
 		if err != nil {
 			return fmt.Errorf("Error writing qcow2 output: %v", err)
@@ -121,7 +123,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"vhd": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -132,7 +134,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"dynamic-vhd": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -143,7 +145,7 @@ var outFuns = map[string]func(string, io.Reader, int) error{
 		return nil
 	},
 	"vmdk": func(base string, image io.Reader, size int) error {
-		kernel, initrd, cmdline, err := tarToInitrd(image)
+		kernel, initrd, cmdline, _, err := tarToInitrd(image)
 		if err != nil {
 			return fmt.Errorf("Error converting to initrd: %v", err)
 		}
@@ -220,16 +222,16 @@ func Formats(base string, image string, formats []string, size int) error {
 	return nil
 }
 
-func tarToInitrd(r io.Reader) ([]byte, []byte, string, error) {
+func tarToInitrd(r io.Reader) ([]byte, []byte, string, []byte, error) {
 	w := new(bytes.Buffer)
 	iw := initrd.NewWriter(w)
 	tr := tar.NewReader(r)
-	kernel, cmdline, err := initrd.CopySplitTar(iw, tr)
+	kernel, cmdline, ucode, err := initrd.CopySplitTar(iw, tr)
 	if err != nil {
-		return []byte{}, []byte{}, "", err
+		return []byte{}, []byte{}, "", []byte{}, err
 	}
 	iw.Close()
-	return kernel, w.Bytes(), cmdline, nil
+	return kernel, w.Bytes(), cmdline, ucode, nil
 }
 
 func tarInitrdKernel(kernel, initrd []byte, cmdline string) (*bytes.Buffer, error) {
@@ -314,21 +316,35 @@ func outputRPi3(image, filename string, filesystem io.Reader) error {
 	return dockerRun(filesystem, output, true, image)
 }
 
-func outputKernelInitrd(base string, kernel []byte, initrd []byte, cmdline string) error {
+func outputKernelInitrd(base string, kernel []byte, initrd []byte, cmdline string, ucode []byte) error {
 	log.Debugf("output kernel/initrd: %s %s", base, cmdline)
-	log.Infof("  %s %s %s", base+"-kernel", base+"-initrd.img", base+"-cmdline")
-	err := ioutil.WriteFile(base+"-initrd.img", initrd, os.FileMode(0644))
-	if err != nil {
-		return err
+
+	if len(ucode) != 0 {
+		log.Infof("  %s ucode+%s %s", base+"-kernel", base+"-initrd.img", base+"-cmdline")
+		if err := ioutil.WriteFile(base+"-initrd.img", ucode, os.FileMode(0644)); err != nil {
+			return err
+		}
+		f, err := os.OpenFile(base+"-initrd.img", os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		if _, err = f.Write(initrd); err != nil {
+			return err
+		}
+	} else {
+		log.Infof("  %s %s %s", base+"-kernel", base+"-initrd.img", base+"-cmdline")
+		if err := ioutil.WriteFile(base+"-initrd.img", initrd, os.FileMode(0644)); err != nil {
+			return err
+		}
 	}
-	err = ioutil.WriteFile(base+"-kernel", kernel, os.FileMode(0644))
-	if err != nil {
+	if err := ioutil.WriteFile(base+"-kernel", kernel, os.FileMode(0644)); err != nil {
 		return err
 	}
 	return ioutil.WriteFile(base+"-cmdline", []byte(cmdline), os.FileMode(0644))
 }
 
-func outputKernelInitrdTarball(base string, kernel []byte, initrd []byte, cmdline string) error {
+func outputKernelInitrdTarball(base string, kernel []byte, initrd []byte, cmdline string, ucode []byte) error {
 	log.Debugf("output kernel/initrd tarball: %s %s", base, cmdline)
 	log.Infof("  %s", base+"-initrd.tar")
 	f, err := os.Create(base + "-initrd.tar")
@@ -369,6 +385,19 @@ func outputKernelInitrdTarball(base string, kernel []byte, initrd []byte, cmdlin
 	}
 	if _, err := tw.Write([]byte(cmdline)); err != nil {
 		return err
+	}
+	if len(ucode) != 0 {
+		hdr := &tar.Header{
+			Name: "ucode.cpio",
+			Mode: 0644,
+			Size: int64(len(ucode)),
+		}
+		if err := tw.WriteHeader(hdr); err != nil {
+			return err
+		}
+		if _, err := tw.Write(ucode); err != nil {
+			return err
+		}
 	}
 	return tw.Close()
 }
