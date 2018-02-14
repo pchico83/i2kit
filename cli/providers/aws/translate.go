@@ -91,6 +91,7 @@ set -e
 sudo docker run \
 	--name %s \
 	-e COMPOSE=%s \
+	-e CONFIG=%s \
 	-e UNIQUE_OPERATION_ID=%s \
 	-e STACK=%s \
 	-e REGION=%s \
@@ -103,6 +104,7 @@ sudo docker run \
 	riberaproject/agent`,
 		containerName,
 		encodedCompose,
+		e.B64DockerConfig(),
 		uniqueOperationID,
 		containerName,
 		e.Provider.Region,

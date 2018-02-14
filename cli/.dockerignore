@@ -1,6 +1,6 @@
 .git/*
 .gitignore
-env.yml
+environment.yml
 
 Dockerfile
 docker-compose.yml
