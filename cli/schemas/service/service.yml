@@ -17,3 +17,4 @@ required:
           contents: "//str"
 optional:
   replicas: "//int"
+  size: "//str"

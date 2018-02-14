@@ -10,6 +10,8 @@ optional:
       security_group: "//str"
       keypair: "//str"
       hosted_zone: "//str"
+  optional:
+    size: "//str"
   docker:
     type: "//rec"
     required:
