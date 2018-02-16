@@ -72,7 +72,7 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 	t.Resources["ASG"] = asgResource
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:            gocf.String(ami),
-		InstanceType:       gocf.String("t2.small"),
+		InstanceType:       gocf.String(s.GetSize(e)),
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     []string{e.Provider.SecurityGroup},
 		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
