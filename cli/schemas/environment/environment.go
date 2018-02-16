@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"encoding/base64"
 	"fmt"
 )
 
@@ -55,4 +56,24 @@ func (e *Environment) Validate() error {
 		return fmt.Errorf("'provider.hosted_zone' cannot be empty")
 	}
 	return nil
+}
+
+var dockerConfigTemplate = `
+{
+	"auths": {
+		"https://index.docker.io/v1/": {
+			"auth": "%s"
+		}
+	}
+}
+`
+
+func (e *Environment) B64DockerConfig() string {
+	if e.Docker == nil || e.Docker.Username == "" || e.Docker.Password == "" {
+		return ""
+	}
+	auth := fmt.Sprintf("%s:%s", e.Docker.Username, e.Docker.Password)
+	authEncoded := base64.StdEncoding.EncodeToString([]byte(auth))
+	config := fmt.Sprintf(dockerConfigTemplate, authEncoded)
+	return base64.StdEncoding.EncodeToString([]byte(config))
 }
