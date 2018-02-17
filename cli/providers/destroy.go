@@ -1,7 +1,7 @@
 package providers
 
 import (
-	"fmt"
+	logger "log"
 
 	"github.com/pchico83/i2kit/cli/providers/aws"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
@@ -9,10 +9,10 @@ import (
 )
 
 //Destroy destroys a given service in a given environment
-func Destroy(s *service.Service, e *environment.Environment) error {
+func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
 	if e.Provider == nil {
-		fmt.Printf("Service '%s' dry-run destroy was successful\n", s.Name)
+		log.Printf("Service '%s' dry-run destroy was successful", s.Name)
 		return nil
 	}
-	return aws.Destroy(s, e)
+	return aws.Destroy(s, e, log)
 }

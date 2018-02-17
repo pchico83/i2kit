@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"time"
 
+	logger "log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elb"
-	log "github.com/sirupsen/logrus"
 )
 
 //Wait waits for the instances in a ELB to be registered
-func Wait(name string, config *aws.Config) error {
-	log.Infof("Waiting for instances to be registered in the '%s' load balancer...", name)
+func Wait(name string, config *aws.Config, log *logger.Logger) error {
+	log.Printf("Waiting for instances to be registered in the '%s' load balancer...", name)
 	svc := elb.New(session.New(), config)
 	dii := &elb.DescribeInstanceHealthInput{
 		LoadBalancerName: aws.String(name),
@@ -39,12 +40,12 @@ func Wait(name string, config *aws.Config) error {
 		}
 		if current != registered {
 			registered = current
-			log.Infof("%d instances registered in the '%s' load balancer", registered, name)
+			log.Printf("%d instances registered in the '%s' load balancer", registered, name)
 		}
 	}
 	if limit <= 0 {
 		return fmt.Errorf("Instances failed to register in the load balancer after 20 minutes")
 	}
-	log.Infof("All instances are now registered in the '%s' load balancer", name)
+	log.Printf("All instances are now registered in the '%s' load balancer", name)
 	return nil
 }

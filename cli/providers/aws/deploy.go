@@ -1,16 +1,16 @@
 package aws
 
 import (
+	logger "log"
+
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
-
-	log "github.com/sirupsen/logrus"
 )
 
 //Deploy deploys a AWS Cloud Formation stack
-func Deploy(s *service.Service, e *environment.Environment) error {
+func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
 	consumed := 0
 	config, err := getAWSConfig(e)
 	if err != nil {
@@ -21,10 +21,10 @@ func Deploy(s *service.Service, e *environment.Environment) error {
 		return err
 	}
 	if stack != nil && *stack.StackStatus == "ROLLBACK_COMPLETE" {
-		if err = Destroy(s, e); err != nil {
+		if err = Destroy(s, e, log); err != nil {
 			return err
 		}
-		log.Infof("Destroying previous stack '%s' in 'ROLLBACK_COMPLETE' state...", s.Name)
+		log.Printf("Destroying previous stack '%s' in 'ROLLBACK_COMPLETE' state...", s.Name)
 		stack = nil
 	}
 	var stackID string
@@ -34,6 +34,7 @@ func Deploy(s *service.Service, e *environment.Environment) error {
 		if err != nil {
 			return err
 		}
+		log.Printf("Creating stack '%s'...", s.Name)
 		if stackID, err = cf.Create(s.Name, template, config); err != nil {
 			return err
 		}
@@ -44,11 +45,17 @@ func Deploy(s *service.Service, e *environment.Environment) error {
 		}
 		stackID = *stack.StackId
 		consumed = cf.NumEvents(stackID, config)
-		if err = cf.Update(stackID, template, config); err != nil {
+		log.Printf("Updating the stack '%s'...", stackID)
+		var updated bool
+		updated, err = cf.Update(stackID, template, config)
+		if err != nil {
 			return err
 		}
+		if !updated {
+			log.Printf("No updates are to be performed.")
+		}
 	}
-	if err = cf.Watch(stackID, consumed, config); err != nil {
+	if err = cf.Watch(stackID, consumed, config, log); err != nil {
 		return err
 	}
 	stack, err = cf.Get(stackID, config)
@@ -57,7 +64,7 @@ func Deploy(s *service.Service, e *environment.Environment) error {
 	}
 	for _, o := range stack.Outputs {
 		if *o.OutputKey == "elbName" {
-			return elb.Wait(*o.OutputValue, config)
+			return elb.Wait(*o.OutputValue, config, log)
 		}
 	}
 	return nil

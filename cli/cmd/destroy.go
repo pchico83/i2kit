@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"io"
 	"io/ioutil"
+
+	logger "log"
 
 	"github.com/pchico83/i2kit/cli/providers"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
@@ -11,7 +14,7 @@ import (
 )
 
 //Destroy destroys an i2kit service
-func Destroy() *cobra.Command {
+func Destroy(w io.Writer) *cobra.Command {
 	var servicePath string
 	var environmentPath string
 	cmd := &cobra.Command{
@@ -43,8 +46,8 @@ func Destroy() *cobra.Command {
 			if err = e.Validate(); err != nil {
 				return err
 			}
-
-			return providers.Destroy(&s, &e)
+			log := logger.New(w, "", logger.Ldate|logger.Ltime)
+			return providers.Destroy(&s, &e, log)
 		},
 	}
 	cmd.Flags().StringVarP(&servicePath, "service", "s", "service.yml", "Service yml file to be destroyed")
