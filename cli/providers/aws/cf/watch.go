@@ -5,14 +5,15 @@ import (
 	"strings"
 	"time"
 
+	logger "log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
-	log "github.com/sirupsen/logrus"
 )
 
 //Watch waits for a AWS Cloud Formation stack state
-func Watch(name string, consumed int, config *aws.Config) error {
+func Watch(name string, consumed int, config *aws.Config, log *logger.Logger) error {
 	svc := cloudformation.New(session.New(), config)
 	errors := 0
 	endsWithInProgress := true
@@ -39,16 +40,14 @@ func Watch(name string, consumed int, config *aws.Config) error {
 		if err == nil {
 			for index := len(events.StackEvents) - consumed - 1; index >= 0; index-- {
 				if events.StackEvents[index].ResourceStatusReason != nil {
-					log.Infof("%s: %s (%s) %s %s",
-						events.StackEvents[index].Timestamp.Local().Format("2006-01-02 15:04:05"),
+					log.Printf("%s (%s) %s %s",
 						*events.StackEvents[index].LogicalResourceId,
 						*events.StackEvents[index].ResourceType,
 						*events.StackEvents[index].ResourceStatus,
 						*events.StackEvents[index].ResourceStatusReason,
 					)
 				} else {
-					log.Infof("%s: %s (%s)  %s",
-						events.StackEvents[index].Timestamp.Local().Format("2006-01-02 15:04:05"),
+					log.Printf("%s (%s)  %s",
 						*events.StackEvents[index].LogicalResourceId,
 						*events.StackEvents[index].ResourceType,
 						*events.StackEvents[index].ResourceStatus,

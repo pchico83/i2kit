@@ -11,9 +11,6 @@ import:
   subpackages:
   - src/moby
 - package: github.com/sirupsen/logrus
-- package: github.com/Sirupsen/logrus
-  repo: git@github.com:/sirupsen/logrus
-  vcs: git
 - package: github.com/spf13/cobra
 - package: gopkg.in/yaml.v2
 - package: k8s.io/api
