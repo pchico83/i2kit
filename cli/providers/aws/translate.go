@@ -88,6 +88,7 @@ func userData(containerName, encodedCompose string, e *environment.Environment, 
 		`#!/bin/bash
 
 set -e
+INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 sudo docker run \
 	--name %s \
 	-e COMPOSE=%s \
@@ -100,7 +101,7 @@ sudo docker run \
 	--log-driver=awslogs \
 	--log-opt awslogs-region=us-west-2 \
 	--log-opt awslogs-group=i2kit-%s \
-	--log-opt tag='{{ with split .Name ":" }}{{join . "_"}}{{end}}-{{.ID}}' \
+	--log-opt tag=$INSTANCE_ID \
 	riberaproject/agent`,
 		containerName,
 		encodedCompose,
@@ -166,7 +167,7 @@ func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 			"Statement": map[string]interface{}{
 				"Effect":   "Allow",
 				"Action":   []string{"logs:CreateLogStream", "logs:PutLogEvents"},
-				"Resource": fmt.Sprintf("arn:aws:logs:us-west-2:*:log-group:i2kit-%s:log-stream:%s-*", s.Name, s.Name),
+				"Resource": fmt.Sprintf("arn:aws:logs:us-west-2:*:log-group:i2kit-%s:log-stream:i-*", s.Name),
 			},
 		},
 	}
