@@ -17,6 +17,10 @@ func Create(name, template string, config *aws.Config) (string, error) {
 				Key:   aws.String("i2kit"),
 				Value: aws.String("alpha"),
 			},
+			&cloudformation.Tag{
+				Key:   aws.String("Name"),
+				Value: aws.String(name),
+			},
 		},
 	}
 	svc := cloudformation.New(session.New(), config)
