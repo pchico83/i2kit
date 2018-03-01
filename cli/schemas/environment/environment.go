@@ -14,6 +14,7 @@ type Environment struct {
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
 	Size          string `yaml:"size,omitempty"`
+	Certificate   string `yaml:"certificate,omitempty"`
 	AccessKey     string `yaml:"access_key,omitempty"`
 	SecretKey     string `yaml:"secret_key,omitempty"`
 	Region        string `yaml:"region,omitempty"`
@@ -69,6 +70,7 @@ var dockerConfigTemplate = `
 }
 `
 
+//B64DockerConfig conputes the base64 format of docker credentials
 func (e *Environment) B64DockerConfig() string {
 	if e.Docker == nil || e.Docker.Username == "" || e.Docker.Password == "" {
 		return ""

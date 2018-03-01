@@ -40,33 +40,31 @@ func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	parts := strings.SplitN(port, ":", 5)
-	switch len(parts) {
-	case 4:
-		if strings.ToUpper(parts[0]) != "HTTP" || strings.ToUpper(parts[2]) != "HTTP" {
-			return fmt.Errorf("unsupported port protocol")
-		}
-
-		p.Protocol = "HTTP"
-		p.Port = parts[1]
-		p.InstanceProtocol = "HTTP"
-		p.InstancePort = parts[3]
-
-	case 5:
-		// AWS format: https:443:http:8000:arn:aws:acm:us-west-2:062762192540:certificate/12de3ac5-abcd-461a-1234-9e81250b33d8
-		if strings.ToUpper(parts[0]) != "HTTPS" ||
-			(strings.ToUpper(parts[2]) != "HTTP" && strings.ToUpper(parts[2]) != "HTTPS") {
-			return fmt.Errorf("unsupported port protocol")
-		}
-
-		p.Protocol = "HTTPS"
-		p.Port = parts[1]
-		p.InstanceProtocol = strings.ToUpper(parts[2])
-		p.InstancePort = parts[3]
-		p.Certificate = parts[4]
-	default:
+	certificate := ""
+	if len(parts) != 4 && len(parts) != 5 {
 		return fmt.Errorf("invalid port syntax")
 	}
+	if len(parts) == 5 {
+		certificate = parts[4]
+	}
 
+	protocol := strings.ToUpper(parts[0])
+	instanceProtocol := strings.ToUpper(parts[2])
+	if protocol != "HTTP" && protocol != "HTTPS" {
+		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
+	}
+	if protocol == "HTTP" && protocol != instanceProtocol {
+		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
+	}
+	if protocol == "HTTPS" && instanceProtocol != "HTTPS" && instanceProtocol != "HTTP" {
+		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
+	}
+
+	p.Protocol = protocol
+	p.Port = parts[1]
+	p.InstanceProtocol = instanceProtocol
+	p.InstancePort = parts[3]
+	p.Certificate = certificate
 	return nil
 }
 

@@ -172,10 +172,22 @@ func TestUnmarshalPorts(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "https-to-http-no-cert",
-			port:    "https:8000:http:80",
+			name:    "http-to-tcp",
+			port:    "http:8000:tcp:5000",
 			want:    &Port{},
 			wantErr: true,
+		},
+		{
+			name: "https-to-http-no-cert",
+			port: "https:443:http:8000",
+			want: &Port{
+				Protocol:         "HTTPS",
+				Port:             "443",
+				InstanceProtocol: "HTTP",
+				InstancePort:     "8000",
+				Certificate:      "",
+			},
+			wantErr: false,
 		},
 		{
 			name:    "unknown-schema",
