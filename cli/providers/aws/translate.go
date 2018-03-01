@@ -28,7 +28,10 @@ func Translate(s *service.Service, e *environment.Environment, signal string) (s
 	if err != nil {
 		return "", err
 	}
-	loadELB(t, s, e)
+	err = loadELB(t, s, e)
+	if err != nil {
+		return "", err
+	}
 	loadIAM(t, s, e)
 	loadLogGroup(t, s, e)
 	loadRoute53(t, s, e)
@@ -114,25 +117,32 @@ sudo docker run \
 	return base64.StdEncoding.EncodeToString([]byte(value))
 }
 
-func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) {
-	instancePort := ""
+func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) error {
+	healthCheckPort := ""
 	listeners := gocf.ElasticLoadBalancingListenerList{}
 	for _, container := range s.Containers {
 		for _, port := range container.Ports {
-			if instancePort == "" {
-				instancePort = port.InstancePort
+			if healthCheckPort == "" {
+				healthCheckPort = port.InstancePort
+			}
+			certificate := port.Certificate
+			if certificate == "" {
+				certificate = e.Provider.Certificate
+			}
+			if certificate == "" && (port.Protocol == "HTTPS" || port.Protocol == "SSL") {
+				return fmt.Errorf("Port '%s:%s' requires a certificate", port.Protocol, port.Port)
 			}
 			listeners = append(listeners, gocf.ElasticLoadBalancingListener{
 				InstancePort:     gocf.String(port.InstancePort),
 				InstanceProtocol: gocf.String(port.InstanceProtocol),
 				LoadBalancerPort: gocf.String(port.Port),
 				Protocol:         gocf.String(port.Protocol),
-				SSLCertificateId: gocf.String(port.Certificate),
+				SSLCertificateId: gocf.String(certificate),
 			})
 		}
 	}
 	if len(listeners) == 0 {
-		return
+		return nil
 	}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String(s.Name),
@@ -141,7 +151,7 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) {
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
 			HealthyThreshold:   gocf.String("2"),
 			Interval:           gocf.String("15"),
-			Target:             gocf.String(fmt.Sprintf("TCP:%s", instancePort)),
+			Target:             gocf.String(fmt.Sprintf("TCP:%s", healthCheckPort)),
 			Timeout:            gocf.String("10"),
 			UnhealthyThreshold: gocf.String("2"),
 		},
@@ -149,13 +159,14 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	elb.Listeners = &listeners
 	t.Outputs["elbURL"] = &gocf.Output{
 		Description: "The URL of the stack",
-		Value:       gocf.Join("", gocf.String("http://"), gocf.GetAtt("ELB", "DNSName")),
+		Value:       gocf.GetAtt("ELB", "DNSName"),
 	}
 	t.Outputs["elbName"] = &gocf.Output{
 		Description: "Load balancer name",
 		Value:       gocf.Ref("ELB"),
 	}
 	t.AddResource("ELB", elb)
+	return nil
 }
 
 func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
