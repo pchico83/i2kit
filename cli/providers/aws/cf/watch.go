@@ -10,10 +10,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/pchico83/i2kit/cli/providers/aws/cloudwatch"
+	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
 //Watch waits for a AWS Cloud Formation stack state
-func Watch(name string, consumed int, config *aws.Config, log *logger.Logger) error {
+func Watch(name string, consumed int, s *service.Service, startTime *int64, config *aws.Config, log *logger.Logger) error {
 	svc := cloudformation.New(session.New(), config)
 	errors := 0
 	endsWithInProgress := true
@@ -55,6 +57,11 @@ func Watch(name string, consumed int, config *aws.Config, log *logger.Logger) er
 				}
 			}
 			consumed = len(events.StackEvents)
+		}
+		if *startTime != -1 {
+			if err := cloudwatch.RetrieveLogs(s, startTime, config, log); err != nil {
+				return err
+			}
 		}
 		endsWithInProgress = strings.HasSuffix(*response.Stacks[0].StackStatus, "IN_PROGRESS")
 		if !endsWithInProgress && !strings.HasSuffix(*response.Stacks[0].StackStatus, "COMPLETE") {

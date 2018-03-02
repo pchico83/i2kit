@@ -18,13 +18,13 @@ var amisPerRegion = map[string]string{
 }
 
 // Translate an i2kit service to a AWS CloudFormation template
-func Translate(s *service.Service, e *environment.Environment, signal string) (string, error) {
+func Translate(s *service.Service, e *environment.Environment) (string, error) {
 	ami, ok := amisPerRegion[e.Provider.Region]
 	if !ok {
 		return "", fmt.Errorf("Region'%s' is not supported", e.Provider.Region)
 	}
 	t := gocf.NewTemplate()
-	err := loadASG(t, s, e, ami, signal)
+	err := loadASG(t, s, e, ami)
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +39,7 @@ func Translate(s *service.Service, e *environment.Environment, signal string) (s
 	return string(marshalledTemplate), nil
 }
 
-func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami, signal string) error {
+func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami string) error {
 	domain := e.Provider.HostedZone[:len(e.Provider.HostedZone)-1]
 	encodedCompose, err := compose.Create(s, domain)
 	if err != nil {
@@ -53,6 +53,12 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		MaxSize:                 gocf.String(replicas),
 		MinSize:                 gocf.String(replicas),
 		VPCZoneIdentifier:       gocf.StringList(gocf.String(e.Provider.Subnet)),
+	}
+	creationPolicy := &gocf.CreationPolicy{
+		ResourceSignal: &gocf.CreationPolicyResourceSignal{
+			Count:   gocf.Integer(int64(s.Replicas)),
+			Timeout: gocf.String("PT15M"),
+		},
 	}
 	updatePolicy := &gocf.UpdatePolicy{
 		AutoScalingRollingUpdate: &gocf.UpdatePolicyAutoScalingRollingUpdate{
@@ -68,7 +74,11 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 			),
 		},
 	}
-	asgResource := &gocf.Resource{Properties: asg, UpdatePolicy: updatePolicy}
+	asgResource := &gocf.Resource{
+		Properties:     asg,
+		CreationPolicy: creationPolicy,
+		UpdatePolicy:   updatePolicy,
+	}
 	t.Resources["ASG"] = asgResource
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:            gocf.String(ami),
@@ -76,13 +86,13 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     []string{e.Provider.SecurityGroup},
 		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
-		UserData:           gocf.String(userData(s.Name, encodedCompose, e, signal)),
+		UserData:           gocf.String(userData(s.Name, encodedCompose, e)),
 	}
 	t.AddResource("LaunchConfig", launchConfig)
 	return nil
 }
 
-func userData(containerName, encodedCompose string, e *environment.Environment, signal string) string {
+func userData(containerName, encodedCompose string, e *environment.Environment) string {
 	uniqueOperationID := uuid.New().String()
 	value := fmt.Sprintf(
 		`#!/bin/bash
@@ -96,7 +106,6 @@ sudo docker run \
 	-e UNIQUE_OPERATION_ID=%s \
 	-e STACK=%s \
 	-e REGION=%s \
-	-e SIGNAL=%s \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	--log-driver=awslogs \
 	--log-opt awslogs-region=us-west-2 \
@@ -109,7 +118,6 @@ sudo docker run \
 		uniqueOperationID,
 		containerName,
 		e.Provider.Region,
-		signal,
 		containerName,
 	)
 	return base64.StdEncoding.EncodeToString([]byte(value))
