@@ -2,6 +2,7 @@ package aws
 
 import (
 	logger "log"
+	"strings"
 
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
@@ -20,17 +21,17 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	if err != nil {
 		return err
 	}
-	if stack != nil && *stack.StackStatus == "ROLLBACK_COMPLETE" {
+	if stack != nil && (*stack.StackStatus == "ROLLBACK_COMPLETE" || strings.HasSuffix(*stack.StackStatus, "_FAILED")) {
 		if err = Destroy(s, e, log); err != nil {
 			return err
 		}
-		log.Printf("Destroying previous stack '%s' in 'ROLLBACK_COMPLETE' state...", s.Name)
+		log.Printf("Destroying previous stack '%s' in '%s' state...", s.Name, *stack.StackStatus)
 		stack = nil
 	}
 	var stackID string
 	var template string
 	if stack == nil {
-		template, err = Translate(s, e, "NO")
+		template, err = Translate(s, e)
 		if err != nil {
 			return err
 		}
@@ -39,7 +40,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 			return err
 		}
 	} else {
-		template, err = Translate(s, e, "YES")
+		template, err = Translate(s, e)
 		if err != nil {
 			return err
 		}
@@ -55,7 +56,16 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 			log.Printf("No updates are to be performed.")
 		}
 	}
-	if err = cf.Watch(stackID, consumed, config, log); err != nil {
+	stack, err = cf.Get(stackID, config)
+	if err != nil {
+		return err
+	}
+	startTime := new(int64)
+	*startTime = 0
+	if stack.LastUpdatedTime != nil {
+		*startTime = stack.LastUpdatedTime.Unix() * 1000
+	}
+	if err = cf.Watch(stackID, consumed, s, startTime, config, log); err != nil {
 		return err
 	}
 	stack, err = cf.Get(stackID, config)
@@ -64,7 +74,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	}
 	for _, o := range stack.Outputs {
 		if *o.OutputKey == "elbName" {
-			return elb.Wait(*o.OutputValue, config, log)
+			return elb.Wait(s, *o.OutputValue, config, log)
 		}
 	}
 	return nil

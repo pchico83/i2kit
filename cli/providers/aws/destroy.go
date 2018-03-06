@@ -24,5 +24,7 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 	if err = cf.Delete(s.Name, config); err != nil {
 		return err
 	}
-	return cf.Watch(*stack.StackId, consumed, config, log)
+	startTime := new(int64)
+	*startTime = -1
+	return cf.Watch(*stack.StackId, consumed, s, startTime, config, log)
 }
