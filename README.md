@@ -16,7 +16,7 @@ Once you're to deploy, define your application deployment behavior using a YAML 
 
 *i2kit* does not require a central control plane to manage your running applications (à la Docker Swarm or Kubernetes), which not only reduces configuration, maintenance and infrastructure costs, but also eliminates critical runtime dependencies in your applications.
 
-Check our [academic paper](https://github.com/pchico83/i2kit/tree/master/cli/docs/paper.pdf) for full details about the i2kit behavior.
+Check our [paper](https://github.com/pchico83/i2kit/tree/master/cli/docs/paper.pdf) for full details about the i2kit behavior.
 
 ## Getting Started
 
@@ -26,18 +26,24 @@ Now, build the `i2kit` binary:
 go build -o /usr/local/bin/i2kit
 ```
 
-Execute commands by running:
+Create an `environment.yml` configuration as documented [here](https://github.com/pchico83/i2kit/tree/master/cli/docs/environment-yml.md).
+
+In particular, you will need to have a [hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/CreatingHostedZone.html) configured in Route53.
+
+Once you have your environment ready, execute the following command:
 
 ```
-i2kit deploy -s service.yml -e environment.yml
-i2kit destroy -f service.yml -e environment.yml
+i2kit deploy -s samples/nginx/service.yml -e environment.yml
 ```
 
-where `service.yml` is the path to your [Service Manifest]((https://github.com/pchico83/i2kit/tree/master/cli/docs/service-taml.md)) and `environment.yml` is the path to your [Environment Manifest]((https://github.com/pchico83/i2kit/tree/master/cli/docs/environment-yml.md)).
+After the command finishes, you can browse to *nginx.your_hosted_zone_here* to verify that nginx is running as expected.
 
-In particular, you will need to have a domain owned by AWS and a hosted zone in this domain.
+Finally, destroy your service by executing the following command:
 
-Once you have configure your `environment.yml`, you can deploy the services in the `cli/samples` folder:
+```
+i2kit destroy -s samples/nginx/service.yml -e environment.yml
+```
 
-- `nginx.yml`  is a simple service running nginx.
-- `voting.yml`, `results.yml` and `redis.yml` is the i2kit equivalent of the well known [docker voting sample application](https://github.com/tutumcloud/voting-demo/blob/master/tutum.yml).
+[Service Manifest](https://github.com/pchico83/i2kit/tree/master/cli/docs/service-yml.md) gives more information about how to create your own Service Manifests.
+
+[Environment Manifest](https://github.com/pchico83/i2kit/tree/master/cli/docs/environment-yml.md) gives more information about how to create your own Environment Manifests.
