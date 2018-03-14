@@ -1,0 +1,7 @@
+name: results
+replicas: 1
+containers:
+  results:
+    image: tutum/results-demo
+    ports:
+      - http:80:http:80

@@ -1,0 +1,7 @@
+name: voting
+replicas: 3
+containers:
+  voting:
+    image: tutum/voting-demo
+    ports:
+      - http:80:http:80
