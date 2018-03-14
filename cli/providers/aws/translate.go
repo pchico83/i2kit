@@ -135,7 +135,7 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 				healthCheckPort = port.InstancePort
 			}
 			certificate := port.Certificate
-			if certificate == "" && port.Protocol == "HTTPS" {
+			if certificate == "" && (port.Protocol == "HTTPS" || port.Protocol == "SSL") {
 				if e.Provider.Certificate == "" {
 					return fmt.Errorf("Port '%s:%s' requires a certificate", port.Protocol, port.Port)
 				}

@@ -50,13 +50,19 @@ func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	protocol := strings.ToUpper(parts[0])
 	instanceProtocol := strings.ToUpper(parts[2])
-	if protocol != "HTTP" && protocol != "HTTPS" {
+	if protocol != "HTTP" && protocol != "HTTPS" && protocol != "TCP" && protocol != "SSL" {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
 	if protocol == "HTTP" && protocol != instanceProtocol {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
 	if protocol == "HTTPS" && instanceProtocol != "HTTPS" && instanceProtocol != "HTTP" {
+		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
+	}
+	if protocol == "TCP" && protocol != instanceProtocol {
+		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
+	}
+	if protocol == "SSL" && instanceProtocol != "SSL" && instanceProtocol != "TCP" {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
 
