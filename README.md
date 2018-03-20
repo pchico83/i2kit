@@ -6,7 +6,7 @@ The simplicity of containers, the confidence of virtual machines.
 
 *i2kit* won't force a development environment on you, keep using what works for you.
 
-Once you're to deploy, define your application deployment behavior using a YAML file (à la docker-compose) and *i2kit* will make the rest for you. *i2kit* builds an extremely lightweight virtual machine for each of your containers/pods using linuxkit, which not only brings the workload isolation and security advantages of virtual machines, but also seamlessly plug into proven cloud vender technology. For example, if AWS is the cloud provider of your choice, *i2kit* will:
+Once you're ready to deploy, define your application deployment behavior using a YAML file (à la docker-compose) and *i2kit* will make the rest for you. *i2kit* builds an extremely lightweight virtual machine for each of your containers/pods using linuxkit, which not only brings the workload isolation and security advantages of virtual machines, but also seamlessly plug into proven cloud vendor technology. For example, if AWS is the cloud provider of your choice, *i2kit* will:
 
 - Balance traffic to your Container VMs using ELBs.
 - Enforce fault tolerance using autoscalability groups.
