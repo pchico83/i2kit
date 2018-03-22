@@ -1,8 +1,28 @@
 package environment
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
+
+	yaml "gopkg.in/yaml.v2"
+
+	"github.com/stretchr/testify/require"
 )
+
+func TestMarshalEnvironment(t *testing.T) {
+	readBytes, err := ioutil.ReadFile("./examples/environment.yml")
+	require.NoError(t, err)
+	var envStruct Environment
+	fmt.Println(string(readBytes))
+	err = yaml.Unmarshal(readBytes, &envStruct)
+	require.NoError(t, err)
+	envBytes, err := yaml.Marshal(envStruct)
+	require.NoError(t, err)
+	if string(envBytes) != string(readBytes) {
+		t.Fatal(string(envBytes))
+	}
+}
 
 func TestDockerConfig(t *testing.T) {
 	e := &Environment{}

@@ -13,7 +13,9 @@ provider:
   access_key: ***************
   secret_key: ***************
   region: us-west-2
-  subnet: subnet-7c75725
+  subnets:
+  - subnet-7c75725
+  - subnet-7c75726
   security_group: sg-dffe41a3
   keypair: development
   hosted_zone: example.com.

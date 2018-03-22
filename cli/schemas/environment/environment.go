@@ -13,15 +13,15 @@ type Environment struct {
 
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
-	Size          string `yaml:"size,omitempty"`
-	Certificate   string `yaml:"certificate,omitempty"`
-	AccessKey     string `yaml:"access_key,omitempty"`
-	SecretKey     string `yaml:"secret_key,omitempty"`
-	Region        string `yaml:"region,omitempty"`
-	Subnet        string `yaml:"subnet,omitempty"`
-	SecurityGroup string `yaml:"security_group,omitempty"`
-	Keypair       string `yaml:"keypair,omitempty"`
-	HostedZone    string `yaml:"hosted_zone,omitempty"`
+	Size          string    `yaml:"size,omitempty"`
+	Certificate   string    `yaml:"certificate,omitempty"`
+	AccessKey     string    `yaml:"access_key,omitempty"`
+	SecretKey     string    `yaml:"secret_key,omitempty"`
+	Region        string    `yaml:"region,omitempty"`
+	Subnets       []*string `yaml:"subnets,omitempty"`
+	SecurityGroup string    `yaml:"security_group,omitempty"`
+	Keypair       string    `yaml:"keypair,omitempty"`
+	HostedZone    string    `yaml:"hosted_zone,omitempty"`
 }
 
 //Docker represents Docker Hub credentials
@@ -45,8 +45,8 @@ func (e *Environment) Validate() error {
 	if e.Provider.Region == "" {
 		return fmt.Errorf("'provider.region' cannot be empty")
 	}
-	if e.Provider.Subnet == "" {
-		return fmt.Errorf("'provider.subnet' cannot be empty")
+	if e.Provider.Subnets == nil || len(e.Provider.Subnets) == 0 {
+		return fmt.Errorf("'provider.subnets' cannot be empty")
 	}
 	if e.Provider.SecurityGroup == "" {
 		return fmt.Errorf("'provider.security_group' cannot be empty")

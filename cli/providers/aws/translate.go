@@ -48,6 +48,10 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 	if err != nil {
 		return err
 	}
+	subnets := &gocf.StringListExpr{Literal: []*gocf.StringExpr{}}
+	for _, item := range e.Provider.Subnets {
+		subnets.Literal = append(subnets.Literal, gocf.String(*item))
+	}
 	replicas := strconv.Itoa(s.Replicas)
 	asg := &gocf.AutoScalingAutoScalingGroup{
 		HealthCheckGracePeriod:  gocf.Integer(15),
@@ -55,7 +59,7 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		LoadBalancerNames:       gocf.StringList(gocf.Ref("ELB")),
 		MaxSize:                 gocf.String(replicas),
 		MinSize:                 gocf.String(replicas),
-		VPCZoneIdentifier:       gocf.StringList(gocf.String(e.Provider.Subnet)),
+		VPCZoneIdentifier:       subnets,
 	}
 	creationPolicy := &gocf.CreationPolicy{
 		ResourceSignal: &gocf.CreationPolicyResourceSignal{
@@ -153,9 +157,13 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 	if len(listeners) == 0 {
 		return nil
 	}
+	subnets := &gocf.StringListExpr{Literal: []*gocf.StringExpr{}}
+	for _, item := range e.Provider.Subnets {
+		subnets.Literal = append(subnets.Literal, gocf.String(*item))
+	}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String(s.Name),
-		Subnets:          gocf.StringList(gocf.String(e.Provider.Subnet)),
+		Subnets:          subnets,
 		SecurityGroups:   []string{e.Provider.SecurityGroup},
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
 			HealthyThreshold:   gocf.String("2"),
