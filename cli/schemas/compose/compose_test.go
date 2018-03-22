@@ -12,7 +12,7 @@ import (
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
-func TestE2E(t *testing.T) {
+func TestEncodedCompose(t *testing.T) {
 	readBytes, err := ioutil.ReadFile("./examples/service.yml")
 	require.NoError(t, err)
 	var s service.Service

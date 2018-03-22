@@ -6,7 +6,9 @@ optional:
       access_key: "//str"
       secret_key: "//str"
       region: "//str"
-      subnet: "//str"
+      subnets:
+        type: "//arr"
+        contents: "//str"
       security_group: "//str"
       keypair: "//str"
       hosted_zone: "//str"
