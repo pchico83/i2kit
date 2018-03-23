@@ -163,7 +163,7 @@ sudo docker run \
 	-e REGION=%s \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	--log-driver=awslogs \
-	--log-opt awslogs-region=us-west-2 \
+	--log-opt awslogs-region=%s \
 	--log-opt awslogs-group=i2kit-%s \
 	--log-opt tag=$INSTANCE_ID \
 	riberaproject/agent`,
@@ -172,6 +172,7 @@ sudo docker run \
 		e.B64DockerConfig(),
 		uniqueOperationID,
 		containerName,
+		e.Provider.Region,
 		e.Provider.Region,
 		containerName,
 	)
@@ -243,7 +244,7 @@ func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 			"Statement": map[string]interface{}{
 				"Effect":   "Allow",
 				"Action":   []string{"logs:CreateLogStream", "logs:PutLogEvents"},
-				"Resource": fmt.Sprintf("arn:aws:logs:us-west-2:*:log-group:i2kit-%s:log-stream:i-*", s.Name),
+				"Resource": fmt.Sprintf("arn:aws:logs:%s:*:log-group:i2kit-%s:log-stream:i-*", e.Provider.Region, s.Name),
 			},
 		},
 	}
