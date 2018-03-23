@@ -1,9 +1,7 @@
-name: results
+name: result
 replicas: 1
 containers:
   results:
     image: docker/example-voting-app-result:latest
     ports:
       - http:80:http:80
-  worker:
-    image: docker/example-voting-app-worker:latest
