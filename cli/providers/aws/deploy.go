@@ -28,10 +28,11 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 		log.Printf("Destroying previous stack '%s' in '%s' state...", s.Name, *stack.StackStatus)
 		stack = nil
 	}
+
 	var stackID string
 	var template string
 	if stack == nil {
-		template, err = Translate(s, e)
+		template, err = Translate(s, e, config)
 		if err != nil {
 			return err
 		}
@@ -40,7 +41,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 			return err
 		}
 	} else {
-		template, err = Translate(s, e)
+		template, err = Translate(s, e, config)
 		if err != nil {
 			return err
 		}

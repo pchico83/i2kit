@@ -10385,7 +10385,7 @@ type EC2SecurityGroupRule struct {
 	// Security Group to allow access. You can use the Ref intrinsic function
 	// to refer to the logical ID of a security group defined in the same
 	// template.
-	SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX *StringExpr `json:"SourceSecurityGroupId (SecurityGroupIngress only),omitempty"`
+	SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX *StringExpr `json:"SourceSecurityGroupId,omitempty"`
 
 	// For non-VPC security groups only. Specifies the name of the Amazon EC2
 	// Security Group to use for access. You can use the Ref intrinsic
