@@ -26,7 +26,7 @@ In the [`dockercloud.yml`](https://github.com/dockersamples/example-voting-app/b
 
 ## Prepare your AWS account
 i2kit requires the following resources:
-- an access_key and a secret_key
+- an access key and a secret key
 - a vpc with at least 1 subnet (we recommend 3)
 - a security group with port 22 exposed (for troubleshooting and service to service communication)
 - a keypair
