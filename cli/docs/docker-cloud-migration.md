@@ -32,10 +32,10 @@ i2kit requires the following resources:
 - a keypair
 - a hosted zone registered in route53
 - An SSL certificate that matches your hosted zone's name (optional)
-- Permissions to create, update and destroy route53 entries, auto scaling groups, elastic load balancers, security groups, ec2 instances, elastic ips and cloud formation stacks.
+- Permissions to create, update and destroy route53 entries, auto scaling groups, elastic load balancers, security groups, ec2 instances, elastic ips, cloudwatch logs, IAM profiles and cloud formation stacks.
 
 ## Create your environment manifest
-Follow the instructions [available here](i2kit/blob/master/cli/docs/environment-yml.md) to create your `environment.yml` file. It will be similar to the one displayed below:
+Follow the instructions [available here](environment-yml.md) to create your `environment.yml` file. It will be similar to the one displayed below:
 
 ```
 # your docker hub credentials, if using private images
@@ -56,7 +56,6 @@ provider:
   keypair: development
   hosted_zone: example.com.
   size: t2.small
-  certificate: arn:aws:acm:us-west-2:062762192540:certificate/12de3ac5-abcd-461a-1234-9e81250b33d8
 ```
 
 ## Convert your docker-cloud.yml to i2kit service manifests
@@ -64,7 +63,7 @@ To launch your application with i2kit, you need to convert your `docker-cloud.ym
 
 Unlike docker cloud, i2kit works with `services`. A `service` is a set of virtual machines running the same list of containers. All containers defined on the same service manifest will run in the same virtual machine. For most cases, every first level key in your docker cloud manifest will map to an i2kit's service manifest.
 
-The full example is included [as a sample](i2kit/tree/master/cli/samples/voting-demo)
+The full example is included [as a sample](../samples/voting-demo).
 
 ### db service
 The `docker-cloud.yml` file defines the db service as follows:
