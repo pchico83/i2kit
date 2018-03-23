@@ -2,6 +2,6 @@ name: voting
 replicas: 3
 containers:
   voting:
-    image: tutum/voting-demo
+    image: docker/example-voting-app-vote:latest
     ports:
       - http:80:http:80

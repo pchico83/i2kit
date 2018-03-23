@@ -1,0 +1,7 @@
+name: db
+replicas: 1
+containers:
+  db:
+    image: postgres:9.4
+    ports:
+      - tcp:5432:tcp:5432
