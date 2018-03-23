@@ -1,4 +1,5 @@
 provider:
+  name: test
   size: t2.small
   certificate: arn:aws:acm:us-west-2:062762192540:certificate/12de3ac5-abcd-461a-1234-9e81250b33d8
   access_key: accesskey

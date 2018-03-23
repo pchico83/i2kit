@@ -3,6 +3,7 @@ optional:
   provider:
     type: "//rec"
     required:
+      name: "//str"
       access_key: "//str"
       secret_key: "//str"
       region: "//str"

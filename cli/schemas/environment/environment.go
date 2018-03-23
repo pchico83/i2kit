@@ -13,6 +13,7 @@ type Environment struct {
 
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
+	Name          string    `yaml:"name,omitempty"`
 	Size          string    `yaml:"size,omitempty"`
 	Certificate   string    `yaml:"certificate,omitempty"`
 	AccessKey     string    `yaml:"access_key,omitempty"`
