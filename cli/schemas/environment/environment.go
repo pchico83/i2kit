@@ -7,14 +7,14 @@ import (
 
 //Environment represents a environment.yml file
 type Environment struct {
+	Name     string    `yaml:"name,omitempty"`
 	Provider *Provider `yaml:"provider,omitempty"`
 	Docker   *Docker   `yaml:"docker,omitempty"`
 }
 
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
-	Name          string    `yaml:"name,omitempty"`
-	Size          string    `yaml:"size,omitempty"`
+	InstanceType  string    `yaml:"instance_type,omitempty"`
 	Certificate   string    `yaml:"certificate,omitempty"`
 	AccessKey     string    `yaml:"access_key,omitempty"`
 	SecretKey     string    `yaml:"secret_key,omitempty"`
