@@ -1,0 +1,7 @@
+name: vote
+replicas: 3
+containers:
+  vote:
+    image: docker/example-voting-app-vote:latest
+    ports:
+      - http:80:http:80

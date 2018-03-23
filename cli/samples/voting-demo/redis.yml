@@ -2,6 +2,6 @@ name: redis
 replicas: 1
 containers:
   redis:
-    image: redis
+    image: redis:alpine
     ports:
       - tcp:6379:tcp:6379
