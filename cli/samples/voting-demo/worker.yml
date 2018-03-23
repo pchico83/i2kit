@@ -1,5 +1,0 @@
-name: worker
-replicas: 1
-containers:
-  worker:
-    image: docker/example-voting-app-worker:latest
