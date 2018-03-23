@@ -8,5 +8,6 @@ services:
     environment:
     - NAME=VALUE
     network_mode: bridge
+    restart: on-failure
     dns_search:
     - staging.i2kit.com
