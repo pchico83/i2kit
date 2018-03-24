@@ -135,14 +135,14 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
 	if len(instanceIngressRules) > 0 {
 		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s.%s", s.Name, e.Provider.Name)),
+			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s.%s", s.Name, e.Name)),
 			SecurityGroupIngress: &instanceIngressRules,
 			VpcId:                gocf.String(vpc),
 		}
 		t.AddResource("InstanceSecurityGroup", securityGroup)
 		securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
 		securityGroup = &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s.%s", s.Name, e.Provider.Name)),
+			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s.%s", s.Name, e.Name)),
 			SecurityGroupIngress: &loadbalancerIngressRules,
 			VpcId:                gocf.String(vpc),
 		}
@@ -151,7 +151,7 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:            gocf.String(ami),
-		InstanceType:       gocf.String(s.GetSize(e)),
+		InstanceType:       gocf.String(s.GetInstanceType(e)),
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     securityGroups,
 		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),

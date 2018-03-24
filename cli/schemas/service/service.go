@@ -6,10 +6,10 @@ import (
 
 //Service represents a service.yml file
 type Service struct {
-	Name       string
-	Replicas   int
-	Size       string
-	Containers map[string]*Container
+	Name         string
+	Replicas     int
+	InstanceType string
+	Containers   map[string]*Container
 }
 
 //Container represents a container in a service.yml file
@@ -40,13 +40,13 @@ func (s *Service) Validate() error {
 	return nil
 }
 
-//GetSize returns the service size taking into account default values
-func (s *Service) GetSize(e *environment.Environment) string {
-	if s.Size != "" {
-		return s.Size
+//GetInstanceType returns the service size taking into account default values
+func (s *Service) GetInstanceType(e *environment.Environment) string {
+	if s.InstanceType != "" {
+		return s.InstanceType
 	}
-	if e.Provider != nil && e.Provider.Size != "" {
-		return e.Provider.Size
+	if e.Provider != nil && e.Provider.InstanceType != "" {
+		return e.Provider.InstanceType
 	}
-	return "t2.nano"
+	return "t2.small"
 }

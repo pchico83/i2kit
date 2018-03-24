@@ -1,4 +1,6 @@
 type: "//rec"
+required:
+  name: "//str"
 optional:
   provider:
     type: "//rec"
@@ -15,7 +17,7 @@ optional:
       hosted_zone: "//str"
     optional:
       certificate: "//str"
-      size: "//str"
+      instance_type: "//str"
   docker:
     type: "//rec"
     required:
