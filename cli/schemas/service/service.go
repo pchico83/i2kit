@@ -56,3 +56,14 @@ func (s *Service) GetInstanceType(e *environment.Environment) string {
 	}
 	return "t2.small"
 }
+
+//GetPorts returns the list of ports of a service
+func (s *Service) GetPorts() []*Port {
+	result := []*Port{}
+	for _, container := range s.Containers {
+		for _, port := range container.Ports {
+			result = append(result, port)
+		}
+	}
+	return result
+}
