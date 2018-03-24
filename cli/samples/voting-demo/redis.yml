@@ -1,5 +1,6 @@
 name: redis
 replicas: 1
+stateful: true
 containers:
   redis:
     image: redis:alpine

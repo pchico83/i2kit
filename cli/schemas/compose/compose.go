@@ -43,7 +43,12 @@ func Create(s *service.Service, domain string) (string, error) {
 			DNSSearch:   []*string{&domain},
 		}
 		for _, p := range c.Ports {
-			composePort := fmt.Sprintf("%s:%s", p.InstancePort, p.InstancePort)
+			var composePort string
+			if s.Stateful {
+				composePort = fmt.Sprintf("%s:%s", p.Port, p.InstancePort)
+			} else {
+				composePort = fmt.Sprintf("%s:%s", p.InstancePort, p.InstancePort)
+			}
 			compose.Services[cName].Ports = append(
 				compose.Services[cName].Ports,
 				&composePort,

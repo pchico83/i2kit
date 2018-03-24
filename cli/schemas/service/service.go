@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 )
 
@@ -8,6 +10,7 @@ import (
 type Service struct {
 	Name         string
 	Replicas     int
+	Stateful     bool
 	InstanceType string
 	Containers   map[string]*Container
 }
@@ -37,6 +40,9 @@ type EnvVar struct {
 
 //Validate returns an error for invalid service.yml files
 func (s *Service) Validate() error {
+	if s.Stateful && s.Replicas != 1 {
+		return fmt.Errorf("Stateful services can only have one replica")
+	}
 	return nil
 }
 
@@ -49,4 +55,15 @@ func (s *Service) GetInstanceType(e *environment.Environment) string {
 		return e.Provider.InstanceType
 	}
 	return "t2.small"
+}
+
+//GetPorts returns the list of ports of a service
+func (s *Service) GetPorts() []*Port {
+	result := []*Port{}
+	for _, container := range s.Containers {
+		for _, port := range container.Ports {
+			result = append(result, port)
+		}
+	}
+	return result
 }

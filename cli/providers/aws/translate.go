@@ -4,7 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	gocf "github.com/crewjam/go-cloudformation"
@@ -40,43 +43,145 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 		return "", fmt.Errorf("Region'%s' is not supported", e.Provider.Region)
 	}
 	t := gocf.NewTemplate()
-	err := loadASG(t, s, e, ami, config)
+	vpc, err := ec2.GetVPC(e, config)
 	if err != nil {
 		return "", err
 	}
-	err = loadELB(t, s, e)
+	domain := strings.TrimSuffix(e.Provider.HostedZone, ".")
+	encodedCompose, err := compose.Create(s, domain)
 	if err != nil {
 		return "", err
+	}
+	if s.Stateful {
+		if err = loadStateful(t, s, e, ami, vpc, encodedCompose); err != nil {
+			return "", err
+		}
+	} else {
+		if err = loadStateless(t, s, e, ami, vpc, encodedCompose); err != nil {
+			return "", err
+		}
 	}
 	loadIAM(t, s, e)
 	loadLogGroup(t, s, e)
-	loadRoute53(t, s, e)
-	marshalledTemplate := []byte("")
-	if marshalledTemplate, err = json.Marshal(t); err != nil {
+	ports := s.GetPorts()
+	if len(ports) > 0 {
+		loadRoute53(t, s, e)
+	}
+	marshalledTemplate, err := json.Marshal(t)
+	if err != nil {
 		return "", err
 	}
 	return string(marshalledTemplate), nil
 }
 
-func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami string, config *aws.Config) error {
-	vpc, err := ec2.GetVPC(e, config)
-	if err != nil {
+func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
+	rand.Seed(time.Now().Unix())
+	subnet := *e.Provider.Subnets[rand.Intn(len(e.Provider.Subnets))]
+	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
+	for _, port := range s.GetPorts() {
+		portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
+		instanceIngressRules = append(
+			instanceIngressRules,
+			gocf.EC2SecurityGroupRule{
+				CidrIp:     gocf.String("0.0.0.0/0"),
+				IpProtocol: gocf.String("tcp"),
+				FromPort:   gocf.Integer(portNumber),
+				ToPort:     gocf.Integer(portNumber),
+			})
+	}
+
+	securityGroups := &gocf.StringListExpr{
+		Literal: []*gocf.StringExpr{gocf.String(e.Provider.SecurityGroup)}}
+	if len(instanceIngressRules) > 0 {
+		securityGroup := &gocf.EC2SecurityGroup{
+			GroupDescription:     gocf.String(fmt.Sprintf("Security Group for %s.%s", s.Name, e.Name)),
+			SecurityGroupIngress: &instanceIngressRules,
+			VpcId:                gocf.String(vpc),
+		}
+		t.AddResource("SecurityGroup", securityGroup)
+		securityGroups.Literal = append(securityGroups.Literal, gocf.Ref("SecurityGroup").String())
+	}
+
+	ec2Instance := &gocf.EC2Instance{
+		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
+		ImageId:            gocf.String(ami),
+		InstanceType:       gocf.String(s.GetInstanceType(e)),
+		KeyName:            gocf.String(e.Provider.Keypair),
+		SecurityGroupIds:   securityGroups,
+		SubnetId:           gocf.String(subnet),
+		UserData:           gocf.String(userData(s.Name, encodedCompose, e)),
+	}
+	t.AddResource("EC2Instance", ec2Instance)
+	elasticIP := &gocf.EC2EIP{
+		InstanceId: gocf.Ref("EC2Instance").String(),
+	}
+	t.AddResource("EIP", elasticIP)
+	return nil
+}
+
+func loadStateless(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
+	if err := loadASG(t, s, e, ami, vpc, encodedCompose); err != nil {
 		return err
 	}
-	domain := e.Provider.HostedZone[:len(e.Provider.HostedZone)-1]
-	encodedCompose, err := compose.Create(s, domain)
-	if err != nil {
-		return err
+	if len(s.GetPorts()) == 0 {
+		return nil
 	}
+	return loadELB(t, s, e)
+}
+
+func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
+	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
+	loadbalancerIngressRules := gocf.EC2SecurityGroupRuleList{}
+	for _, port := range s.GetPorts() {
+		instancePortNumber, _ := strconv.ParseInt(port.InstancePort, 10, 64)
+		instanceIngressRules = append(
+			instanceIngressRules,
+			gocf.EC2SecurityGroupRule{
+				SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX: gocf.Ref("ELBSecurityGroup").String(),
+				IpProtocol: gocf.String("tcp"),
+				FromPort:   gocf.Integer(instancePortNumber),
+				ToPort:     gocf.Integer(instancePortNumber),
+			})
+		portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
+		loadbalancerIngressRules = append(
+			loadbalancerIngressRules,
+			gocf.EC2SecurityGroupRule{
+				CidrIp:     gocf.String("0.0.0.0/0"),
+				IpProtocol: gocf.String("tcp"),
+				FromPort:   gocf.Integer(portNumber),
+				ToPort:     gocf.Integer(portNumber),
+			})
+	}
+	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
+	if len(instanceIngressRules) > 0 {
+		securityGroup := &gocf.EC2SecurityGroup{
+			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s.%s", s.Name, e.Name)),
+			SecurityGroupIngress: &instanceIngressRules,
+			VpcId:                gocf.String(vpc),
+		}
+		t.AddResource("InstanceSecurityGroup", securityGroup)
+		securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
+		securityGroup = &gocf.EC2SecurityGroup{
+			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s.%s", s.Name, e.Name)),
+			SecurityGroupIngress: &loadbalancerIngressRules,
+			VpcId:                gocf.String(vpc),
+		}
+		t.AddResource("ELBSecurityGroup", securityGroup)
+	}
+
 	subnets := &gocf.StringListExpr{Literal: []*gocf.StringExpr{}}
 	for _, item := range e.Provider.Subnets {
 		subnets.Literal = append(subnets.Literal, gocf.String(*item))
 	}
 	replicas := strconv.Itoa(s.Replicas)
+	loadBalancerNames := gocf.StringList(gocf.Ref("ELB"))
+	if len(instanceIngressRules) == 0 {
+		loadBalancerNames = gocf.StringList()
+	}
 	asg := &gocf.AutoScalingAutoScalingGroup{
 		HealthCheckGracePeriod:  gocf.Integer(15),
 		LaunchConfigurationName: gocf.Ref("LaunchConfig").String(),
-		LoadBalancerNames:       gocf.StringList(gocf.Ref("ELB")),
+		LoadBalancerNames:       loadBalancerNames,
 		MaxSize:                 gocf.String(replicas),
 		MinSize:                 gocf.String(replicas),
 		VPCZoneIdentifier:       subnets,
@@ -107,47 +212,6 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		UpdatePolicy:   updatePolicy,
 	}
 	t.Resources["ASG"] = asgResource
-
-	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
-	loadbalancerIngressRules := gocf.EC2SecurityGroupRuleList{}
-	for _, container := range s.Containers {
-		for _, port := range container.Ports {
-			instancePortNumber, _ := strconv.ParseInt(port.InstancePort, 10, 64)
-			instanceIngressRules = append(
-				instanceIngressRules,
-				gocf.EC2SecurityGroupRule{
-					SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX: gocf.Ref("ELBSecurityGroup").String(),
-					IpProtocol: gocf.String("tcp"),
-					FromPort:   gocf.Integer(instancePortNumber),
-					ToPort:     gocf.Integer(instancePortNumber),
-				})
-			portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
-			loadbalancerIngressRules = append(
-				loadbalancerIngressRules,
-				gocf.EC2SecurityGroupRule{
-					CidrIp:     gocf.String("0.0.0.0/0"),
-					IpProtocol: gocf.String("tcp"),
-					FromPort:   gocf.Integer(portNumber),
-					ToPort:     gocf.Integer(portNumber),
-				})
-		}
-	}
-	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
-	if len(instanceIngressRules) > 0 {
-		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s.%s", s.Name, e.Name)),
-			SecurityGroupIngress: &instanceIngressRules,
-			VpcId:                gocf.String(vpc),
-		}
-		t.AddResource("InstanceSecurityGroup", securityGroup)
-		securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
-		securityGroup = &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s.%s", s.Name, e.Name)),
-			SecurityGroupIngress: &loadbalancerIngressRules,
-			VpcId:                gocf.String(vpc),
-		}
-		t.AddResource("ELBSecurityGroup", securityGroup)
-	}
 
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
 		ImageId:            gocf.String(ami),
@@ -196,29 +260,24 @@ sudo docker run \
 func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) error {
 	healthCheckPort := ""
 	listeners := gocf.ElasticLoadBalancingListenerList{}
-	for _, container := range s.Containers {
-		for _, port := range container.Ports {
-			if healthCheckPort == "" {
-				healthCheckPort = port.InstancePort
-			}
-			certificate := port.Certificate
-			if certificate == "" && (port.Protocol == "HTTPS" || port.Protocol == "SSL") {
-				if e.Provider.Certificate == "" {
-					return fmt.Errorf("Port '%s:%s' requires a certificate", port.Protocol, port.Port)
-				}
-				certificate = e.Provider.Certificate
-			}
-			listeners = append(listeners, gocf.ElasticLoadBalancingListener{
-				InstancePort:     gocf.String(port.InstancePort),
-				InstanceProtocol: gocf.String(port.InstanceProtocol),
-				LoadBalancerPort: gocf.String(port.Port),
-				Protocol:         gocf.String(port.Protocol),
-				SSLCertificateId: gocf.String(certificate),
-			})
+	for _, port := range s.GetPorts() {
+		if healthCheckPort == "" {
+			healthCheckPort = port.InstancePort
 		}
-	}
-	if len(listeners) == 0 {
-		return nil
+		certificate := port.Certificate
+		if certificate == "" && (port.Protocol == "HTTPS" || port.Protocol == "SSL") {
+			if e.Provider.Certificate == "" {
+				return fmt.Errorf("Port '%s:%s' requires a certificate", port.Protocol, port.Port)
+			}
+			certificate = e.Provider.Certificate
+		}
+		listeners = append(listeners, gocf.ElasticLoadBalancingListener{
+			InstancePort:     gocf.String(port.InstancePort),
+			InstanceProtocol: gocf.String(port.InstanceProtocol),
+			LoadBalancerPort: gocf.String(port.Port),
+			Protocol:         gocf.String(port.Protocol),
+			SSLCertificateId: gocf.String(certificate),
+		})
 	}
 	subnets := &gocf.StringListExpr{Literal: []*gocf.StringExpr{}}
 	for _, item := range e.Provider.Subnets {
@@ -290,13 +349,25 @@ func loadLogGroup(t *gocf.Template, s *service.Service, e *environment.Environme
 }
 
 func loadRoute53(t *gocf.Template, s *service.Service, e *environment.Environment) {
+	var resourceRecords *gocf.StringListExpr
+	var dependsOn []string
+	if s.Stateful {
+		resourceRecords = gocf.StringList(gocf.GetAtt("EC2Instance", "PublicDnsName"))
+		dependsOn = append(dependsOn, "EIP")
+	} else {
+		resourceRecords = gocf.StringList(gocf.GetAtt("ELB", "DNSName"))
+	}
 	recordName := fmt.Sprintf("%s.%s", s.Name, e.Provider.HostedZone)
-	recordSet := &gocf.Route53RecordSet{
+	recordSetProperties := &gocf.Route53RecordSet{
 		HostedZoneName:  gocf.String(e.Provider.HostedZone),
 		Name:            gocf.String(recordName),
 		Type:            gocf.String("CNAME"),
 		TTL:             gocf.String("900"),
-		ResourceRecords: gocf.StringList(gocf.GetAtt("ELB", "DNSName")),
+		ResourceRecords: resourceRecords,
 	}
-	t.AddResource("DNSRecord", recordSet)
+	resourceSetResource := &gocf.Resource{
+		Properties: recordSetProperties,
+		DependsOn:  dependsOn,
+	}
+	t.Resources["DNSRecord"] = resourceSetResource
 }

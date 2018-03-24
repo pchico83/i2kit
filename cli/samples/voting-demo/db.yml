@@ -1,5 +1,6 @@
 name: db
 replicas: 1
+stateful: true
 containers:
   db:
     image: postgres:9.4

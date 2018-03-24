@@ -14,5 +14,13 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 		log.Printf("Service '%s' dry-run destroy was successful", s.Name)
 		return nil
 	}
+
+	if err := s.Validate(); err != nil {
+		return err
+	}
+	if err := e.Validate(); err != nil {
+		return err
+	}
+
 	return aws.Destroy(s, e, log)
 }
