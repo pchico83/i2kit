@@ -44,7 +44,7 @@ func Create(s *service.Service, domain string) (string, error) {
 		}
 		for _, p := range c.Ports {
 			var composePort string
-			if s.Replicas == 1 {
+			if s.Stateful {
 				composePort = fmt.Sprintf("%s:%s", p.Port, p.InstancePort)
 			} else {
 				composePort = fmt.Sprintf("%s:%s", p.InstancePort, p.InstancePort)

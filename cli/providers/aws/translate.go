@@ -51,12 +51,12 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 	if err != nil {
 		return "", err
 	}
-	if s.Replicas == 1 {
-		if err := loadStateful(t, s, e, ami, vpc, encodedCompose); err != nil {
+	if s.Stateful {
+		if err = loadStateful(t, s, e, ami, vpc, encodedCompose); err != nil {
 			return "", err
 		}
 	} else {
-		if err := loadStateless(t, s, e, ami, vpc, encodedCompose); err != nil {
+		if err = loadStateless(t, s, e, ami, vpc, encodedCompose); err != nil {
 			return "", err
 		}
 	}
@@ -349,7 +349,7 @@ func loadLogGroup(t *gocf.Template, s *service.Service, e *environment.Environme
 func loadRoute53(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	var resourceRecords *gocf.StringListExpr
 	var dependsOn []string
-	if s.Replicas == 1 {
+	if s.Stateful {
 		resourceRecords = gocf.StringList(gocf.GetAtt("EC2Instance", "PublicDnsName"))
 		dependsOn = append(dependsOn, "EIP")
 	} else {

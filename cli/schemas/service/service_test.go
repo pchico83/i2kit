@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/pchico83/i2kit/cli/schemas/environment"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetSize(t *testing.T) {
@@ -20,4 +21,31 @@ func TestGetSize(t *testing.T) {
 	if s.GetInstanceType(e) != "t2.small" {
 		t.Fatal("Expected 't2.small' value from service.yml")
 	}
+}
+
+func TestValidate(t *testing.T) {
+	s := &Service{
+		Stateful: false,
+		Replicas: 1,
+	}
+	err := s.Validate()
+	require.NoError(t, err)
+	s = &Service{
+		Stateful: false,
+		Replicas: 2,
+	}
+	err = s.Validate()
+	require.NoError(t, err)
+	s = &Service{
+		Stateful: true,
+		Replicas: 1,
+	}
+	err = s.Validate()
+	require.NoError(t, err)
+	s = &Service{
+		Stateful: true,
+		Replicas: 2,
+	}
+	err = s.Validate()
+	require.Error(t, err)
 }
