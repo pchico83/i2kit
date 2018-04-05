@@ -4,6 +4,7 @@ import (
 	logger "log"
 
 	"github.com/pchico83/i2kit/cli/providers/aws"
+	"github.com/pchico83/i2kit/cli/providers/aws/route53"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
@@ -22,5 +23,8 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 		return err
 	}
 
+	if e.Provider.HostedZone == "" {
+		route53.Destroy(s, e)
+	}
 	return aws.Destroy(s, e, log)
 }

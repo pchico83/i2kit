@@ -13,10 +13,7 @@ import (
 //Deploy deploys a AWS Cloud Formation stack
 func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
 	consumed := 0
-	config, err := getAWSConfig(e)
-	if err != nil {
-		return err
-	}
+	config := e.Provider.GetConfig()
 	stack, err := cf.Get(s.Name, config)
 	if err != nil {
 		return err
@@ -69,14 +66,9 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	if err = cf.Watch(stackID, consumed, s, startTime, config, log); err != nil {
 		return err
 	}
-	stack, err = cf.Get(stackID, config)
-	if err != nil {
-		return err
-	}
-	for _, o := range stack.Outputs {
-		if *o.OutputKey == "elbName" {
-			return elb.Wait(s, *o.OutputValue, config, log)
-		}
+	elbName, _ := cf.GetOutput(stackID, "elbName", config)
+	if elbName != "" {
+		return elb.Wait(s, elbName, config, log)
 	}
 	return nil
 }

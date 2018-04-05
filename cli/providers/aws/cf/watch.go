@@ -64,7 +64,8 @@ func Watch(name string, consumed int, s *service.Service, startTime *int64, conf
 			}
 		}
 		endsWithInProgress = strings.HasSuffix(*response.Stacks[0].StackStatus, "IN_PROGRESS")
-		if !endsWithInProgress && !strings.HasSuffix(*response.Stacks[0].StackStatus, "COMPLETE") {
+		if !endsWithInProgress && (strings.HasPrefix(*response.Stacks[0].StackStatus, "ROLLBACK") ||
+			!strings.HasSuffix(*response.Stacks[0].StackStatus, "COMPLETE")) {
 			return fmt.Errorf("There was an error and the stack was rollbacked")
 		}
 	}

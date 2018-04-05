@@ -1,6 +1,8 @@
 package cf
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -24,4 +26,18 @@ func Get(name string, config *aws.Config) (*cloudformation.Stack, error) {
 		return nil, nil
 	}
 	return response.Stacks[0], nil
+}
+
+//GetOutput gets a AWS Cloud Formation stack output
+func GetOutput(name, key string, config *aws.Config) (string, error) {
+	stack, err := Get(name, config)
+	if err != nil {
+		return "", err
+	}
+	for _, o := range stack.Outputs {
+		if *o.OutputKey == key {
+			return *o.OutputValue, nil
+		}
+	}
+	return "", fmt.Errorf("Output '%s' not found", key)
 }

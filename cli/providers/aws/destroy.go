@@ -10,12 +10,12 @@ import (
 
 //Destroy destroys a AWS Cloud Formation stack
 func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
-	config, err := getAWSConfig(e)
+	log.Printf("Destroying the stack '%s'...", s.Name)
+	config := e.Provider.GetConfig()
+	stack, err := cf.Get(s.Name, config)
 	if err != nil {
 		return err
 	}
-	log.Printf("Destroying the stack '%s'...", s.Name)
-	stack, err := cf.Get(s.Name, config)
 	if stack == nil {
 		log.Printf("Stack '%s' doesn't exist.", s.Name)
 		return nil

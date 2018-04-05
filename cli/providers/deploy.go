@@ -4,6 +4,7 @@ import (
 	logger "log"
 
 	"github.com/pchico83/i2kit/cli/providers/aws"
+	"github.com/pchico83/i2kit/cli/providers/aws/route53"
 
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
@@ -22,6 +23,11 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	if err := e.Validate(); err != nil {
 		return err
 	}
-
-	return aws.Deploy(s, e, log)
+	if err := aws.Deploy(s, e, log); err != nil {
+		return err
+	}
+	if e.Provider.HostedZone != "" {
+		return nil
+	}
+	return route53.Create(s, e)
 }

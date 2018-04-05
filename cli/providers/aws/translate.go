@@ -64,7 +64,7 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 	loadIAM(t, s, e)
 	loadLogGroup(t, s, e)
 	ports := s.GetPorts()
-	if len(ports) > 0 {
+	if len(ports) > 0 && e.Provider.HostedZone != "" {
 		loadRoute53(t, s, e)
 	}
 	marshalledTemplate, err := json.Marshal(t)

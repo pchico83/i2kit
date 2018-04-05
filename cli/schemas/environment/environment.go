@@ -3,13 +3,27 @@ package environment
 import (
 	"encoding/base64"
 	"fmt"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 //Environment represents a environment.yml file
 type Environment struct {
-	Name     string    `yaml:"name,omitempty"`
-	Provider *Provider `yaml:"provider,omitempty"`
-	Docker   *Docker   `yaml:"docker,omitempty"`
+	Name        string       `yaml:"name,omitempty"`
+	DNSProvider *DNSProvider `yaml:"dns,omitempty"`
+	Provider    *Provider    `yaml:"provider,omitempty"`
+	Docker      *Docker      `yaml:"docker,omitempty"`
+}
+
+//DNSProvider represents the info for the cloud provider where the DNS is created
+type DNSProvider struct {
+	AccessKey    string `yaml:"access_key,omitempty"`
+	SecretKey    string `yaml:"secret_key,omitempty"`
+	HostedZone   string `yaml:"hosted_zone,omitempty"`
+	HostedZoneID string `yaml:"hosted_zone_id,omitempty"`
 }
 
 //Provider represents the info for the cloud provider where the deployment takes place
@@ -36,28 +50,80 @@ func (e *Environment) Validate() error {
 	if e.Provider == nil {
 		return nil
 	}
+	if err := e.Provider.Validate(); err != nil {
+		return err
+	}
+	if e.DNSProvider == nil {
+		return nil
+	}
+	return e.DNSProvider.Validate()
+}
 
-	if e.Provider.AccessKey == "" {
+//GetConfig returns a config aws object
+func (p *Provider) GetConfig() *aws.Config {
+	awsConfig := &aws.Config{
+		Region:      aws.String(p.Region),
+		Credentials: credentials.NewStaticCredentials(p.AccessKey, p.SecretKey, ""),
+	}
+	return awsConfig
+}
+
+//Validate returns an error for invalid providers
+func (p *Provider) Validate() error {
+	if p.AccessKey == "" {
 		return fmt.Errorf("'provider.access_key' cannot be empty")
 	}
-	if e.Provider.SecretKey == "" {
+	if p.SecretKey == "" {
 		return fmt.Errorf("'provider.secret_key' cannot be empty")
 	}
-	if e.Provider.Region == "" {
+	if p.Region == "" {
 		return fmt.Errorf("'provider.region' cannot be empty")
 	}
-	if e.Provider.Subnets == nil || len(e.Provider.Subnets) == 0 {
+	if p.Subnets == nil || len(p.Subnets) == 0 {
 		return fmt.Errorf("'provider.subnets' cannot be empty")
 	}
-	if e.Provider.SecurityGroup == "" {
+	if p.SecurityGroup == "" {
 		return fmt.Errorf("'provider.security_group' cannot be empty")
 	}
-	if e.Provider.Keypair == "" {
+	if p.Keypair == "" {
 		return fmt.Errorf("'provider.keypair' cannot be empty")
 	}
-	if e.Provider.HostedZone == "" {
+	return nil
+}
+
+//GetConfig returns a config aws object
+func (p *DNSProvider) GetConfig() *aws.Config {
+	awsConfig := &aws.Config{
+		Region:      aws.String("us-west-2"),
+		Credentials: credentials.NewStaticCredentials(p.AccessKey, p.SecretKey, ""),
+	}
+	return awsConfig
+}
+
+//Validate returns an error for invalid providers
+func (p *DNSProvider) Validate() error {
+	if p.AccessKey == "" {
+		return fmt.Errorf("'provider.access_key' cannot be empty")
+	}
+	if p.SecretKey == "" {
+		return fmt.Errorf("'provider.secret_key' cannot be empty")
+	}
+	if p.HostedZone == "" {
 		return fmt.Errorf("'provider.hosted_zone' cannot be empty")
 	}
+	svc := route53.New(session.New(), p.GetConfig())
+	hostedZonesInput := &route53.ListHostedZonesByNameInput{
+		DNSName:  aws.String(p.HostedZone),
+		MaxItems: aws.String("1"),
+	}
+	resp, err := svc.ListHostedZonesByName(hostedZonesInput)
+	if err != nil {
+		return err
+	}
+	if len(resp.HostedZones) != 1 {
+		return fmt.Errorf("Hosted zone '%s' not found", p.HostedZone)
+	}
+	p.HostedZoneID = *resp.HostedZones[0].Id
 	return nil
 }
 
