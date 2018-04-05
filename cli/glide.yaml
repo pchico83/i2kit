@@ -1,5 +1,7 @@
 package: github.com/pchico83/i2kit
 import:
+- package: k8s.io/client-go
+  version: v6.0.0
 - package: github.com/aws/aws-sdk-go
   subpackages:
   - aws
