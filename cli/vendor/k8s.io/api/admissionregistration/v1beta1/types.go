@@ -54,9 +54,11 @@ type Rule struct {
 type FailurePolicyType string
 
 const (
-	// Ignore means that an error calling the webhook is ignored.
+	// Ignore means the initializer is removed from the initializers list of an
+	// object if the initializer is timed out.
 	Ignore FailurePolicyType = "Ignore"
-	// Fail means that an error calling the webhook causes the admission to fail.
+	// For 1.7, only "Ignore" is allowed. "Fail" will be allowed when the
+	// extensible admission feature is beta.
 	Fail FailurePolicyType = "Fail"
 )
 
@@ -145,8 +147,8 @@ type Webhook struct {
 	// NamespaceSelector decides whether to run the webhook on an object based
 	// on whether the namespace for that object matches the selector. If the
 	// object itself is a namespace, the matching is performed on
-	// object.metadata.labels. If the object is another cluster scoped resource,
-	// it never skips the webhook.
+	// object.metadata.labels. If the object is other cluster scoped resource,
+	// it is not subjected to the webhook.
 	//
 	// For example, to run the webhook on any objects whose namespace is not
 	// associated with "runlevel" of "0" or "1";  you will set the selector as

@@ -69,7 +69,9 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	}
 	elbName, _ := cf.GetOutput(stackID, "elbName", config)
 	if elbName != "" {
-		return elb.Wait(s, elbName, config, log)
+		if err := elb.Wait(s, elbName, config, log); err != nil {
+			return err
+		}
 	}
 	return nil
 }

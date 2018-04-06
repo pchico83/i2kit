@@ -2,9 +2,13 @@ package providers
 
 import (
 	logger "log"
+	"strings"
 
 	"github.com/pchico83/i2kit/cli/providers/aws"
+	"github.com/pchico83/i2kit/cli/providers/aws/cf"
 	"github.com/pchico83/i2kit/cli/providers/aws/route53"
+	"github.com/pchico83/i2kit/cli/providers/k8"
+	K8Service "github.com/pchico83/i2kit/cli/providers/k8/service"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
@@ -16,6 +20,7 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 		return nil
 	}
 
+	log.Printf("Destroying the service '%s'...", s.GetFullName(e, "-"))
 	if err := s.Validate(); err != nil {
 		return err
 	}
@@ -23,8 +28,32 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 		return err
 	}
 
-	if e.Provider.HostedZone == "" {
-		route53.Destroy(s, e)
+	if e.Provider.HostedZone == "" && len(s.GetPorts()) > 0 {
+		var target string
+		var err error
+		switch e.Provider.GetType() {
+		case environment.AWS:
+			stackName := s.GetFullName(e, "-")
+			target, err = cf.GetOutput(stackName, "elbURL", e.Provider.GetConfig())
+		case environment.K8:
+			target, err = K8Service.GetEndpoint(s, e)
+			if err != nil && strings.Contains(err.Error(), "not found") {
+				err = nil
+			}
+		}
+		if err != nil {
+			return err
+		}
+		if target != "" {
+			route53.Destroy(s, e, target)
+		}
 	}
-	return aws.Destroy(s, e, log)
+	switch e.Provider.GetType() {
+	case environment.AWS:
+		return aws.Destroy(s, e, log)
+	case environment.K8:
+		return k8.Destroy(s, e, log)
+	}
+	log.Print("Done!")
+	return nil
 }
