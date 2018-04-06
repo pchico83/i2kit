@@ -10,21 +10,22 @@ import (
 
 //Destroy destroys a AWS Cloud Formation stack
 func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
-	log.Printf("Destroying the stack '%s'...", s.Name)
+	stackName := s.GetFullName(e, "-")
+	log.Printf("Destroying the stack '%s'...", stackName)
 	config := e.Provider.GetConfig()
-	stack, err := cf.Get(s.Name, config)
+	stack, err := cf.Get(stackName, config)
 	if err != nil {
 		return err
 	}
 	if stack == nil {
-		log.Printf("Stack '%s' doesn't exist.", s.Name)
+		log.Printf("Stack '%s' doesn't exist.", stackName)
 		return nil
 	}
-	consumed := cf.NumEvents(s.Name, config)
-	if err = cf.Delete(s.Name, config); err != nil {
+	consumed := cf.NumEvents(stackName, config)
+	if err = cf.Delete(stackName, config); err != nil {
 		return err
 	}
 	startTime := new(int64)
 	*startTime = -1
-	return cf.Watch(*stack.StackId, consumed, s, startTime, config, log)
+	return cf.Watch(*stack.StackId, consumed, s, e, startTime, config, log)
 }

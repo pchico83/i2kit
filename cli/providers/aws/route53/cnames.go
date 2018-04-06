@@ -22,12 +22,13 @@ func Destroy(s *service.Service, e *environment.Environment) error {
 }
 
 func update(s *service.Service, e *environment.Environment, action string) error {
-	target, err := cf.GetOutput(s.Name, "elbURL", e.Provider.GetConfig())
+	stackName := s.GetFullName(e, "-")
+	target, err := cf.GetOutput(stackName, "elbURL", e.Provider.GetConfig())
 	if err != nil {
 		return err
 	}
 	svc := route53.New(session.New(), e.DNSProvider.GetConfig())
-	recordName := fmt.Sprintf("%s.%s", s.Name, e.DNSProvider.HostedZone)
+	recordName := fmt.Sprintf("%s.%s", s.GetFullName(e, "."), e.DNSProvider.HostedZone)
 	params := &route53.ChangeResourceRecordSetsInput{
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{

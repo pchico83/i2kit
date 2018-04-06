@@ -2,9 +2,12 @@ package service
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 )
+
+var isAlphaNumeric = regexp.MustCompile(`^[A-Za-z0-9]+$`).MatchString
 
 //Service represents a service.yml file
 type Service struct {
@@ -40,10 +43,21 @@ type EnvVar struct {
 
 //Validate returns an error for invalid service.yml files
 func (s *Service) Validate() error {
+	if s.Name == "" {
+		return fmt.Errorf("'service.name' is mandatory")
+	}
+	if !isAlphaNumeric(s.Name) {
+		return fmt.Errorf("'service.name' only allows alphanumeric characters")
+	}
 	if s.Stateful && s.Replicas != 1 {
 		return fmt.Errorf("Stateful services can only have one replica")
 	}
 	return nil
+}
+
+//GetFullName returns the service full name taking into account the environment name
+func (s *Service) GetFullName(e *environment.Environment, sep string) string {
+	return fmt.Sprintf("%s%s%s", s.Name, sep, e.Name)
 }
 
 //GetInstanceType returns the service size taking into account default values
