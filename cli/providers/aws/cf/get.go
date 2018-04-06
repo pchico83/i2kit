@@ -1,8 +1,6 @@
 package cf
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -39,5 +37,5 @@ func GetOutput(name, key string, config *aws.Config) (string, error) {
 			return *o.OutputValue, nil
 		}
 	}
-	return "", fmt.Errorf("Output '%s' not found", key)
+	return "", nil
 }

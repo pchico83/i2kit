@@ -28,4 +28,5 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 	startTime := new(int64)
 	*startTime = -1
 	return cf.Watch(*stack.StackId, consumed, s, e, startTime, config, log)
+	return nil
 }

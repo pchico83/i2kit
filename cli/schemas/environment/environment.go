@@ -3,12 +3,23 @@ package environment
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"regexp"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+)
+
+const (
+	//AWS is the amazon web services provider
+	AWS = "aws"
+	//K8 is the kubernetes provider
+	K8 = "k8"
 )
 
 var isAlphaNumeric = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]+$`).MatchString
@@ -31,6 +42,8 @@ type DNSProvider struct {
 
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
+	Type          string    `yaml:"type,omitempty"`
+	Config        string    `yaml:"config,omitempty"`
 	InstanceType  string    `yaml:"instance_type,omitempty"`
 	Certificate   string    `yaml:"certificate,omitempty"`
 	AccessKey     string    `yaml:"access_key,omitempty"`
@@ -71,6 +84,17 @@ func (e *Environment) Validate() error {
 	return e.DNSProvider.Validate()
 }
 
+//Domain returns the seacrh domain for a given environment
+func (e *Environment) Domain() string {
+	var domain string
+	if e.Provider.HostedZone == "" {
+		domain = strings.TrimSuffix(e.DNSProvider.HostedZone, ".")
+	} else {
+		domain = strings.TrimSuffix(e.Provider.HostedZone, ".")
+	}
+	return fmt.Sprintf("%s.%s", e.Name, domain)
+}
+
 //GetConfig returns a config aws object
 func (p *Provider) GetConfig() *aws.Config {
 	awsConfig := &aws.Config{
@@ -80,27 +104,69 @@ func (p *Provider) GetConfig() *aws.Config {
 	return awsConfig
 }
 
+//GetConfigFile returns a config k8 file
+func (p *Provider) GetConfigFile() (*kubernetes.Clientset, string, error) {
+	sDec, err := base64.StdEncoding.DecodeString(p.Config)
+	if err != nil {
+		return nil, "", fmt.Errorf("Error decoding k8 config: %s", err)
+	}
+	configFile, err := ioutil.TempFile("", "k8-config")
+	if err != nil {
+		return nil, "", fmt.Errorf("Error creating tmp file: %s", err)
+	}
+	err = ioutil.WriteFile(configFile.Name(), sDec, 0644)
+	if err != nil {
+		return nil, configFile.Name(), fmt.Errorf("Error writing to tmp file: %s", err)
+	}
+	config, err := clientcmd.BuildConfigFromFlags("", configFile.Name())
+	if err != nil {
+		return nil, configFile.Name(), fmt.Errorf("Error reading k8 config: %s", err)
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, configFile.Name(), fmt.Errorf("Error creating k8 client: %s", err)
+	}
+	return clientset, configFile.Name(), nil
+}
+
+//GetType returns the type of a provider
+func (p *Provider) GetType() string {
+	return strings.ToLower(p.Type)
+}
+
 //Validate returns an error for invalid providers
 func (p *Provider) Validate() error {
-	if p.AccessKey == "" {
-		return fmt.Errorf("'provider.access_key' cannot be empty")
+	switch p.GetType() {
+	case "":
+		return fmt.Errorf("'provider.type' cannot be emprty")
+	case AWS:
+		if p.AccessKey == "" {
+			return fmt.Errorf("'provider.access_key' cannot be empty")
+		}
+		if p.SecretKey == "" {
+			return fmt.Errorf("'provider.secret_key' cannot be empty")
+		}
+		if p.Region == "" {
+			return fmt.Errorf("'provider.region' cannot be empty")
+		}
+		if p.Subnets == nil || len(p.Subnets) == 0 {
+			return fmt.Errorf("'provider.subnets' cannot be empty")
+		}
+		if p.SecurityGroup == "" {
+			return fmt.Errorf("'provider.security_group' cannot be empty")
+		}
+		if p.Keypair == "" {
+			return fmt.Errorf("'provider.keypair' cannot be empty")
+		}
+		return nil
+	case K8:
+		if p.Config == "" {
+			return fmt.Errorf("'provider.configs' cannot be empty")
+		}
+		return nil
+	default:
+		return fmt.Errorf("'provider.type' '%s' is not supported", p.GetType())
 	}
-	if p.SecretKey == "" {
-		return fmt.Errorf("'provider.secret_key' cannot be empty")
-	}
-	if p.Region == "" {
-		return fmt.Errorf("'provider.region' cannot be empty")
-	}
-	if p.Subnets == nil || len(p.Subnets) == 0 {
-		return fmt.Errorf("'provider.subnets' cannot be empty")
-	}
-	if p.SecurityGroup == "" {
-		return fmt.Errorf("'provider.security_group' cannot be empty")
-	}
-	if p.Keypair == "" {
-		return fmt.Errorf("'provider.keypair' cannot be empty")
-	}
-	return nil
 }
 
 //GetConfig returns a config aws object

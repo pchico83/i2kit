@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -47,14 +46,7 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 	if err != nil {
 		return "", err
 	}
-	var domain string
-	if e.Provider.HostedZone == "" {
-		domain = strings.TrimSuffix(e.DNSProvider.HostedZone, ".")
-	} else {
-		domain = strings.TrimSuffix(e.Provider.HostedZone, ".")
-	}
-	domain = fmt.Sprintf("%s.%s", e.Name, domain)
-	encodedCompose, err := compose.Create(s, domain)
+	encodedCompose, err := compose.Create(s, e.Domain())
 	if err != nil {
 		return "", err
 	}
