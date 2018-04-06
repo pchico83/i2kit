@@ -25,24 +25,28 @@ func TestGetSize(t *testing.T) {
 
 func TestValidate(t *testing.T) {
 	s := &Service{
+		Name:     "test",
 		Stateful: false,
 		Replicas: 1,
 	}
 	err := s.Validate()
 	require.NoError(t, err)
 	s = &Service{
+		Name:     "test",
 		Stateful: false,
 		Replicas: 2,
 	}
 	err = s.Validate()
 	require.NoError(t, err)
 	s = &Service{
+		Name:     "test",
 		Stateful: true,
 		Replicas: 1,
 	}
 	err = s.Validate()
 	require.NoError(t, err)
 	s = &Service{
+		Name:     "test",
 		Stateful: true,
 		Replicas: 2,
 	}

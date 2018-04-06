@@ -9,6 +9,17 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+const (
+	//HTTP is the http protocol
+	HTTP = "HTTP"
+	//HTTPS is the https protocol
+	HTTPS = "HTTPS"
+	//TCP is the tcp protocol
+	TCP = "TCP"
+	//SSL is the ssl protocol
+	SSL = "SSL"
+)
+
 //MarshalYAML fails if p has missing required values
 func (p *Port) MarshalYAML() (interface{}, error) {
 	if p.Protocol == "" || p.Port == "" || p.InstanceProtocol == "" || p.InstancePort == "" {
@@ -50,19 +61,19 @@ func (p *Port) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	protocol := strings.ToUpper(parts[0])
 	instanceProtocol := strings.ToUpper(parts[2])
-	if protocol != "HTTP" && protocol != "HTTPS" && protocol != "TCP" && protocol != "SSL" {
+	if protocol != HTTP && protocol != HTTPS && protocol != TCP && protocol != SSL {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
-	if protocol == "HTTP" && protocol != instanceProtocol {
+	if protocol == HTTP && protocol != instanceProtocol {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
-	if protocol == "HTTPS" && instanceProtocol != "HTTPS" && instanceProtocol != "HTTP" {
+	if protocol == HTTPS && instanceProtocol != HTTPS && instanceProtocol != HTTP {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
-	if protocol == "TCP" && protocol != instanceProtocol {
+	if protocol == TCP && protocol != instanceProtocol {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
-	if protocol == "SSL" && instanceProtocol != "SSL" && instanceProtocol != "TCP" {
+	if protocol == SSL && instanceProtocol != SSL && instanceProtocol != TCP {
 		return fmt.Errorf("unsupported port protocol mapping from '%s' to '%s'", parts[0], parts[2])
 	}
 

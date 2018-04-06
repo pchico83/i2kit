@@ -13,8 +13,9 @@ import (
 //Deploy deploys a AWS Cloud Formation stack
 func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) error {
 	consumed := 0
+	stackName := s.GetFullName(e, "-")
 	config := e.Provider.GetConfig()
-	stack, err := cf.Get(s.Name, config)
+	stack, err := cf.Get(stackName, config)
 	if err != nil {
 		return err
 	}
@@ -22,7 +23,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 		if err = Destroy(s, e, log); err != nil {
 			return err
 		}
-		log.Printf("Destroying previous stack '%s' in '%s' state...", s.Name, *stack.StackStatus)
+		log.Printf("Destroying previous stack '%s' in '%s' state...", stackName, *stack.StackStatus)
 		stack = nil
 	}
 
@@ -33,8 +34,8 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 		if err != nil {
 			return err
 		}
-		log.Printf("Creating stack '%s'...", s.Name)
-		if stackID, err = cf.Create(s.Name, template, config); err != nil {
+		log.Printf("Creating stack '%s'...", stackName)
+		if stackID, err = cf.Create(stackName, template, config); err != nil {
 			return err
 		}
 	} else {
@@ -44,7 +45,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 		}
 		stackID = *stack.StackId
 		consumed = cf.NumEvents(stackID, config)
-		log.Printf("Updating the stack '%s'...", stackID)
+		log.Printf("Updating the stack '%s'...", stackName)
 		var updated bool
 		updated, err = cf.Update(stackID, template, config)
 		if err != nil {
@@ -63,7 +64,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	if stack.LastUpdatedTime != nil {
 		*startTime = stack.LastUpdatedTime.Unix() * 1000
 	}
-	if err = cf.Watch(stackID, consumed, s, startTime, config, log); err != nil {
+	if err = cf.Watch(stackID, consumed, s, e, startTime, config, log); err != nil {
 		return err
 	}
 	elbName, _ := cf.GetOutput(stackID, "elbName", config)

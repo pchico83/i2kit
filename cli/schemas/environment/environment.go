@@ -3,12 +3,15 @@ package environment
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 )
+
+var isAlphaNumeric = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]+$`).MatchString
 
 //Environment represents a environment.yml file
 type Environment struct {
@@ -47,6 +50,12 @@ type Docker struct {
 
 //Validate returns an error for invalid environment.yml files
 func (e *Environment) Validate() error {
+	if e.Name == "" {
+		return fmt.Errorf("'environment.name' is mandatory")
+	}
+	if !isAlphaNumeric(e.Name) {
+		return fmt.Errorf("'environemnt.name' only allows alphanumeric characters")
+	}
 	if e.Provider == nil {
 		return nil
 	}
@@ -54,6 +63,9 @@ func (e *Environment) Validate() error {
 		return err
 	}
 	if e.DNSProvider == nil {
+		if e.Provider.HostedZone == "" {
+			return fmt.Errorf("'environemnt.provider.hosted_zone' must be defined if no dns provider is defined")
+		}
 		return nil
 	}
 	return e.DNSProvider.Validate()

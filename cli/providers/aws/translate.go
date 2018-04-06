@@ -47,7 +47,13 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 	if err != nil {
 		return "", err
 	}
-	domain := strings.TrimSuffix(e.Provider.HostedZone, ".")
+	var domain string
+	if e.Provider.HostedZone == "" {
+		domain = strings.TrimSuffix(e.DNSProvider.HostedZone, ".")
+	} else {
+		domain = strings.TrimSuffix(e.Provider.HostedZone, ".")
+	}
+	domain = fmt.Sprintf("%s.%s", e.Name, domain)
 	encodedCompose, err := compose.Create(s, domain)
 	if err != nil {
 		return "", err
@@ -94,7 +100,7 @@ func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environme
 		Literal: []*gocf.StringExpr{gocf.String(e.Provider.SecurityGroup)}}
 	if len(instanceIngressRules) > 0 {
 		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Security Group for %s.%s", s.Name, e.Name)),
+			GroupDescription:     gocf.String(fmt.Sprintf("Security Group for %s", s.GetFullName(e, "-"))),
 			SecurityGroupIngress: &instanceIngressRules,
 			VpcId:                gocf.String(vpc),
 		}
@@ -109,7 +115,7 @@ func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environme
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroupIds:   securityGroups,
 		SubnetId:           gocf.String(subnet),
-		UserData:           gocf.String(userData(s.Name, encodedCompose, e)),
+		UserData:           gocf.String(userData(s.GetFullName(e, "-"), encodedCompose, e)),
 	}
 	t.AddResource("EC2Instance", ec2Instance)
 	elasticIP := &gocf.EC2EIP{
@@ -155,14 +161,14 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
 	if len(instanceIngressRules) > 0 {
 		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s.%s", s.Name, e.Name)),
+			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s", s.GetFullName(e, "-"))),
 			SecurityGroupIngress: &instanceIngressRules,
 			VpcId:                gocf.String(vpc),
 		}
 		t.AddResource("InstanceSecurityGroup", securityGroup)
 		securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
 		securityGroup = &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s.%s", s.Name, e.Name)),
+			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s", s.GetFullName(e, "-"))),
 			SecurityGroupIngress: &loadbalancerIngressRules,
 			VpcId:                gocf.String(vpc),
 		}
@@ -219,7 +225,7 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     securityGroups,
 		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
-		UserData:           gocf.String(userData(s.Name, encodedCompose, e)),
+		UserData:           gocf.String(userData(s.GetFullName(e, "-"), encodedCompose, e)),
 	}
 	t.AddResource("LaunchConfig", launchConfig)
 	return nil
@@ -265,7 +271,7 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 			healthCheckPort = port.InstancePort
 		}
 		certificate := port.Certificate
-		if certificate == "" && (port.Protocol == "HTTPS" || port.Protocol == "SSL") {
+		if certificate == "" && (port.Protocol == service.HTTPS || port.Protocol == service.SSL) {
 			if e.Provider.Certificate == "" {
 				return fmt.Errorf("Port '%s:%s' requires a certificate", port.Protocol, port.Port)
 			}
@@ -285,7 +291,7 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 	}
 	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup), gocf.Ref("ELBSecurityGroup").String()}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
-		LoadBalancerName: gocf.String(s.Name),
+		LoadBalancerName: gocf.String(s.GetFullName(e, "-")),
 		Subnets:          subnets,
 		SecurityGroups:   securityGroups,
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
@@ -311,13 +317,13 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 
 func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	policy := gocf.IAMPolicies{
-		PolicyName: gocf.String(s.Name),
+		PolicyName: gocf.String(s.GetFullName(e, "-")),
 		PolicyDocument: &map[string]interface{}{
 			"Version": "2012-10-17",
 			"Statement": map[string]interface{}{
 				"Effect":   "Allow",
 				"Action":   []string{"logs:CreateLogStream", "logs:PutLogEvents"},
-				"Resource": fmt.Sprintf("arn:aws:logs:%s:*:log-group:i2kit-%s:log-stream:i-*", e.Provider.Region, s.Name),
+				"Resource": fmt.Sprintf("arn:aws:logs:%s:*:log-group:i2kit-%s:log-stream:i-*", e.Provider.Region, s.GetFullName(e, "-")),
 			},
 		},
 	}
@@ -342,7 +348,7 @@ func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 
 func loadLogGroup(t *gocf.Template, s *service.Service, e *environment.Environment) {
 	logGroup := &gocf.LogsLogGroup{
-		LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s", s.Name)),
+		LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s", s.GetFullName(e, "-"))),
 		RetentionInDays: gocf.Integer(30),
 	}
 	t.AddResource("LogGroup", logGroup)
@@ -357,7 +363,7 @@ func loadRoute53(t *gocf.Template, s *service.Service, e *environment.Environmen
 	} else {
 		resourceRecords = gocf.StringList(gocf.GetAtt("ELB", "DNSName"))
 	}
-	recordName := fmt.Sprintf("%s.%s", s.Name, e.Provider.HostedZone)
+	recordName := fmt.Sprintf("%s.%s", s.GetFullName(e, "."), e.Provider.HostedZone)
 	recordSetProperties := &gocf.Route53RecordSet{
 		HostedZoneName:  gocf.String(e.Provider.HostedZone),
 		Name:            gocf.String(recordName),
