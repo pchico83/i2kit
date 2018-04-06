@@ -16,7 +16,8 @@ import (
 
 //Deploy deploys a i2kit service as k8 deployment
 func Deploy(s *service.Service, e *environment.Environment, c *kubernetes.Clientset, log *logger.Logger) error {
-	deploymentName := s.GetFullName(e, "-")
+	deploymentName := s.Name
+	// deploymentName := s.GetFullName(e, "-")
 	dClient := c.AppsV1beta1().Deployments(apiv1.NamespaceDefault)
 
 	d, err := dClient.Get(deploymentName, metav1.GetOptions{})
@@ -60,7 +61,8 @@ func Deploy(s *service.Service, e *environment.Environment, c *kubernetes.Client
 
 //Destroy destroys the k8 deployment created by a i2kit service
 func Destroy(s *service.Service, e *environment.Environment, c *kubernetes.Clientset, log *logger.Logger) error {
-	deploymentName := s.GetFullName(e, "-")
+	deploymentName := s.Name
+	// deploymentName := s.GetFullName(e, "-")
 	log.Printf("Deleting deployment '%s'...", deploymentName)
 	dClient := c.AppsV1beta1().Deployments(apiv1.NamespaceDefault)
 	deletePolicy := metav1.DeletePropagationForeground

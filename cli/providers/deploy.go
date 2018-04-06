@@ -60,5 +60,4 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	}
 	log.Print("Done!")
 	return nil
-
 }

@@ -12,8 +12,9 @@ import (
 
 // Translate an i2kit service to a k8 deployment manifest
 func Translate(s *service.Service, e *environment.Environment) *appsv1beta1.Deployment {
-	deploymentName := s.GetFullName(e, "-")
-	domain := e.Domain()
+	deploymentName := s.Name
+	// deploymentName := s.GetFullName(e, "-")
+	// domain := e.Domain()
 	replicas := int32(s.Replicas)
 	containers := []apiv1.Container{}
 	for name, c := range s.Containers {
@@ -58,9 +59,9 @@ func Translate(s *service.Service, e *environment.Environment) *appsv1beta1.Depl
 				},
 				Spec: apiv1.PodSpec{
 					Containers: containers,
-					DNSConfig: &apiv1.PodDNSConfig{
-						Searches: []string{domain},
-					},
+					// DNSConfig: &apiv1.PodDNSConfig{
+					// 	Searches: []string{domain},
+					// },
 				},
 			},
 		},

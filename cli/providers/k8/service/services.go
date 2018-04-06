@@ -16,7 +16,8 @@ import (
 
 //Deploy deploys a i2kit service as k8 service
 func Deploy(s *service.Service, e *environment.Environment, c *kubernetes.Clientset, log *logger.Logger) error {
-	serviceName := s.GetFullName(e, "-")
+	serviceName := s.Name
+	// serviceName := s.GetFullName(e, "-")
 	k8Service, err := c.CoreV1().Services("default").Get(serviceName, metav1.GetOptions{})
 	if err != nil && !strings.Contains(err.Error(), "not found") {
 		return fmt.Errorf("Error getting k8 service: %s", err)
@@ -48,7 +49,8 @@ func Deploy(s *service.Service, e *environment.Environment, c *kubernetes.Client
 
 //GetEndpoint returns the endpoint of a given k8 service
 func GetEndpoint(s *service.Service, e *environment.Environment) (string, error) {
-	serviceName := s.GetFullName(e, "-")
+	serviceName := s.Name
+	// serviceName := s.GetFullName(e, "-")
 	c, tmpfile, err := e.Provider.GetConfigFile()
 	if tmpfile != "" {
 		defer os.Remove(tmpfile)
@@ -74,7 +76,8 @@ func GetEndpoint(s *service.Service, e *environment.Environment) (string, error)
 
 //Destroy destroys the k8 service created by a i2kit service
 func Destroy(s *service.Service, e *environment.Environment, c *kubernetes.Clientset, log *logger.Logger) error {
-	serviceName := s.GetFullName(e, "-")
+	serviceName := s.Name
+	// serviceName := s.GetFullName(e, "-")
 	log.Printf("Deleting service '%s'...", serviceName)
 	err := c.CoreV1().Services("default").Delete(serviceName, &metav1.DeleteOptions{})
 	if err != nil {

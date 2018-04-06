@@ -12,7 +12,8 @@ import (
 
 //Translate an i2kit service to a k8 service manifest
 func Translate(s *service.Service, e *environment.Environment) *apiv1.Service {
-	serviceName := s.GetFullName(e, "-")
+	serviceName := s.Name
+	// serviceName := s.GetFullName(e, "-")
 	return &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
