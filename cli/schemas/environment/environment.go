@@ -114,7 +114,7 @@ func (p *Provider) GetConfigFile() (*kubernetes.Clientset, string, error) {
 	if err != nil {
 		return nil, "", fmt.Errorf("Error creating tmp file: %s", err)
 	}
-	err = ioutil.WriteFile(configFile.Name(), sDec, 0644)
+	err = ioutil.WriteFile(configFile.Name(), sDec, 0400)
 	if err != nil {
 		return nil, configFile.Name(), fmt.Errorf("Error writing to tmp file: %s", err)
 	}
@@ -138,7 +138,7 @@ func (p *Provider) GetType() string {
 func (p *Provider) Validate() error {
 	switch p.GetType() {
 	case "":
-		return fmt.Errorf("'provider.type' cannot be emprty")
+		return fmt.Errorf("'provider.type' cannot be empty")
 	case AWS:
 		if p.AccessKey == "" {
 			return fmt.Errorf("'provider.access_key' cannot be empty")
@@ -161,7 +161,11 @@ func (p *Provider) Validate() error {
 		return nil
 	case K8:
 		if p.Config == "" {
-			return fmt.Errorf("'provider.configs' cannot be empty")
+			return fmt.Errorf("'provider.config' cannot be empty")
+		}
+		_, err := base64.StdEncoding.DecodeString(p.Config)
+		if err != nil {
+			return fmt.Errorf("'provider.config' is not a valid base64 encoded string")
 		}
 		return nil
 	default:
