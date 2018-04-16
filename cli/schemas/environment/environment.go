@@ -67,7 +67,7 @@ func (e *Environment) Validate() error {
 		return fmt.Errorf("'environment.name' is mandatory")
 	}
 	if !isAlphaNumeric(e.Name) {
-		return fmt.Errorf("'environemnt.name' only allows alphanumeric characters")
+		return fmt.Errorf("'environment.name' only allows alphanumeric characters")
 	}
 	if e.Provider == nil {
 		return nil
@@ -77,7 +77,7 @@ func (e *Environment) Validate() error {
 	}
 	if e.DNSProvider == nil {
 		if e.Provider.HostedZone == "" {
-			return fmt.Errorf("'environemnt.provider.hosted_zone' must be defined if no dns provider is defined")
+			return fmt.Errorf("'environment.provider.hosted_zone' must be defined if no dns provider is defined")
 		}
 		return nil
 	}
