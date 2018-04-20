@@ -111,6 +111,7 @@ func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environme
 	}
 	t.AddResource("EC2Instance", ec2Instance)
 	elasticIP := &gocf.EC2EIP{
+		Domain:     gocf.String("vpc"),
 		InstanceId: gocf.Ref("EC2Instance").String(),
 	}
 	t.AddResource("EIP", elasticIP)
