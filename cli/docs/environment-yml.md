@@ -18,7 +18,6 @@ provider:
   subnets:
   - subnet-7c75725
   - subnet-7c75726
-  security_group: sg-dffe41a3
   keypair: development
   hosted_zone: example.com.
   instance_type: t2.small

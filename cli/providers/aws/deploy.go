@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
+	"github.com/pchico83/i2kit/cli/providers/aws/ec2"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
@@ -15,6 +16,9 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	consumed := 0
 	stackName := s.GetFullName(e, "-")
 	config := e.Provider.GetConfig()
+	if err := ec2.CreateSG(e, config); err != nil {
+		return err
+	}
 	stack, err := cf.Get(stackName, config)
 	if err != nil {
 		return err
