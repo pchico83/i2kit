@@ -75,28 +75,10 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
 	rand.Seed(time.Now().Unix())
 	subnet := *e.Provider.Subnets[rand.Intn(len(e.Provider.Subnets))]
-	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
-	for _, port := range s.GetPorts() {
-		portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
-		instanceIngressRules = append(
-			instanceIngressRules,
-			gocf.EC2SecurityGroupRule{
-				CidrIp:     gocf.String("0.0.0.0/0"),
-				IpProtocol: gocf.String("tcp"),
-				FromPort:   gocf.Integer(portNumber),
-				ToPort:     gocf.Integer(portNumber),
-			})
-	}
-
 	securityGroups := &gocf.StringListExpr{
 		Literal: []*gocf.StringExpr{gocf.String(e.Provider.SecurityGroup)}}
-	if len(instanceIngressRules) > 0 {
-		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Security Group for %s", s.GetFullName(e, "-"))),
-			SecurityGroupIngress: &instanceIngressRules,
-			VpcId:                gocf.String(vpc),
-		}
-		t.AddResource("SecurityGroup", securityGroup)
+	if s.Public {
+		loadSG(t, s, e, vpc)
 		securityGroups.Literal = append(securityGroups.Literal, gocf.Ref("SecurityGroup").String())
 	}
 
@@ -118,6 +100,29 @@ func loadStateful(t *gocf.Template, s *service.Service, e *environment.Environme
 	return nil
 }
 
+func loadSG(t *gocf.Template, s *service.Service, e *environment.Environment, vpc string) {
+	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
+	for _, port := range s.GetPorts() {
+		portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
+		instanceIngressRules = append(
+			instanceIngressRules,
+			gocf.EC2SecurityGroupRule{
+				CidrIp:     gocf.String("0.0.0.0/0"),
+				IpProtocol: gocf.String("tcp"),
+				FromPort:   gocf.Integer(portNumber),
+				ToPort:     gocf.Integer(portNumber),
+			})
+	}
+	if len(instanceIngressRules) > 0 {
+		securityGroup := &gocf.EC2SecurityGroup{
+			GroupDescription:     gocf.String(fmt.Sprintf("Security Group for %s", s.GetFullName(e, "-"))),
+			SecurityGroupIngress: &instanceIngressRules,
+			VpcId:                gocf.String(vpc),
+		}
+		t.AddResource("SecurityGroup", securityGroup)
+	}
+}
+
 func loadStateless(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
 	if err := loadASG(t, s, e, ami, vpc, encodedCompose); err != nil {
 		return err
@@ -129,43 +134,47 @@ func loadStateless(t *gocf.Template, s *service.Service, e *environment.Environm
 }
 
 func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
-	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
-	loadbalancerIngressRules := gocf.EC2SecurityGroupRuleList{}
-	for _, port := range s.GetPorts() {
-		instancePortNumber, _ := strconv.ParseInt(port.InstancePort, 10, 64)
-		instanceIngressRules = append(
-			instanceIngressRules,
-			gocf.EC2SecurityGroupRule{
-				SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX: gocf.Ref("ELBSecurityGroup").String(),
-				IpProtocol: gocf.String("tcp"),
-				FromPort:   gocf.Integer(instancePortNumber),
-				ToPort:     gocf.Integer(instancePortNumber),
-			})
-		portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
-		loadbalancerIngressRules = append(
-			loadbalancerIngressRules,
-			gocf.EC2SecurityGroupRule{
-				CidrIp:     gocf.String("0.0.0.0/0"),
-				IpProtocol: gocf.String("tcp"),
-				FromPort:   gocf.Integer(portNumber),
-				ToPort:     gocf.Integer(portNumber),
-			})
-	}
 	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
-	if len(instanceIngressRules) > 0 {
-		securityGroup := &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s", s.GetFullName(e, "-"))),
-			SecurityGroupIngress: &instanceIngressRules,
-			VpcId:                gocf.String(vpc),
+	loadBalancerNames := gocf.StringList()
+	if s.Public {
+		instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
+		loadbalancerIngressRules := gocf.EC2SecurityGroupRuleList{}
+		for _, port := range s.GetPorts() {
+			instancePortNumber, _ := strconv.ParseInt(port.InstancePort, 10, 64)
+			instanceIngressRules = append(
+				instanceIngressRules,
+				gocf.EC2SecurityGroupRule{
+					SourceSecurityGroupIdXXSecurityGroupIngressXOnlyX: gocf.Ref("ELBSecurityGroup").String(),
+					IpProtocol: gocf.String("tcp"),
+					FromPort:   gocf.Integer(instancePortNumber),
+					ToPort:     gocf.Integer(instancePortNumber),
+				})
+			portNumber, _ := strconv.ParseInt(port.Port, 10, 64)
+			loadbalancerIngressRules = append(
+				loadbalancerIngressRules,
+				gocf.EC2SecurityGroupRule{
+					CidrIp:     gocf.String("0.0.0.0/0"),
+					IpProtocol: gocf.String("tcp"),
+					FromPort:   gocf.Integer(portNumber),
+					ToPort:     gocf.Integer(portNumber),
+				})
 		}
-		t.AddResource("InstanceSecurityGroup", securityGroup)
-		securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
-		securityGroup = &gocf.EC2SecurityGroup{
-			GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s", s.GetFullName(e, "-"))),
-			SecurityGroupIngress: &loadbalancerIngressRules,
-			VpcId:                gocf.String(vpc),
+		if len(instanceIngressRules) > 0 {
+			securityGroup := &gocf.EC2SecurityGroup{
+				GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s", s.GetFullName(e, "-"))),
+				SecurityGroupIngress: &instanceIngressRules,
+				VpcId:                gocf.String(vpc),
+			}
+			t.AddResource("InstanceSecurityGroup", securityGroup)
+			securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
+			securityGroup = &gocf.EC2SecurityGroup{
+				GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s", s.GetFullName(e, "-"))),
+				SecurityGroupIngress: &loadbalancerIngressRules,
+				VpcId:                gocf.String(vpc),
+			}
+			t.AddResource("ELBSecurityGroup", securityGroup)
+			loadBalancerNames = gocf.StringList(gocf.Ref("ELB"))
 		}
-		t.AddResource("ELBSecurityGroup", securityGroup)
 	}
 
 	subnets := &gocf.StringListExpr{Literal: []*gocf.StringExpr{}}
@@ -173,10 +182,6 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 		subnets.Literal = append(subnets.Literal, gocf.String(*item))
 	}
 	replicas := strconv.Itoa(s.Replicas)
-	loadBalancerNames := gocf.StringList(gocf.Ref("ELB"))
-	if len(instanceIngressRules) == 0 {
-		loadBalancerNames = gocf.StringList()
-	}
 	asg := &gocf.AutoScalingAutoScalingGroup{
 		HealthCheckGracePeriod:  gocf.Integer(15),
 		LaunchConfigurationName: gocf.Ref("LaunchConfig").String(),
@@ -282,10 +287,23 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 	for _, item := range e.Provider.Subnets {
 		subnets.Literal = append(subnets.Literal, gocf.String(*item))
 	}
-	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup), gocf.Ref("ELBSecurityGroup").String()}
+	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
+	if s.Public {
+		securityGroups = append(securityGroups, gocf.Ref("ELBSecurityGroup").String())
+	}
+	schema := "internal"
+	if s.Public {
+		schema = "internet-facing"
+	}
+	crossZone := false
+	if len(subnets.Literal) > 0 {
+		crossZone = true
+	}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
 		LoadBalancerName: gocf.String(s.GetFullName(e, "-")),
 		Subnets:          subnets,
+		Scheme:           gocf.String(schema),
+		CrossZone:        gocf.Bool(crossZone),
 		SecurityGroups:   securityGroups,
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
 			HealthyThreshold:   gocf.String("2"),

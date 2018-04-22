@@ -14,6 +14,7 @@ type Service struct {
 	Name         string
 	Replicas     int
 	Stateful     bool
+	Public       bool
 	InstanceType string
 	Containers   map[string]*Container
 }

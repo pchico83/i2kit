@@ -1,5 +1,6 @@
 name: vote
 replicas: 3
+public: true
 containers:
   vote:
     image: docker/example-voting-app-vote:latest

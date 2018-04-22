@@ -25,7 +25,7 @@ func Destroy(s *service.Service, e *environment.Environment, log *logger.Logger)
 	if err != nil {
 		return err
 	}
-	if len(s.GetPorts()) > 0 {
+	if len(s.GetPorts()) > 0 && s.Public {
 		err = k8service.Destroy(s, e, c, log)
 		if err != nil {
 			return err
