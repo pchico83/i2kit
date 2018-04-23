@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
@@ -18,7 +19,15 @@ func TestEncodedCompose(t *testing.T) {
 	var s service.Service
 	err = yaml.Unmarshal(readBytes, &s)
 	require.NoError(t, err)
-	generatedEncodedCompose, err := Create(&s, "staging.i2kit.com")
+	e := &environment.Environment{
+		Name: "staging",
+		Provider: &environment.Provider{
+			Region:     "us-west-2",
+			HostedZone: "i2kit.com.",
+		},
+	}
+	generatedEncodedCompose, err := Create(&s, e)
+	require.NoError(t, err)
 	composeBytes, err := ioutil.ReadFile("./examples/compose.yml")
 	require.NoError(t, err)
 	encoded := base64.StdEncoding.EncodeToString(composeBytes)

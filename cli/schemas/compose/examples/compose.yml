@@ -8,6 +8,12 @@ services:
     environment:
     - NAME=VALUE
     network_mode: bridge
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: i2kit-test-staging
+        awslogs-region: us-west-2
+        tag: nginx-${INSTANCE_ID}
     restart: on-failure
     dns_search:
     - staging.i2kit.com

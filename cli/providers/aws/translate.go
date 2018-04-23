@@ -46,7 +46,7 @@ func Translate(s *service.Service, e *environment.Environment, config *aws.Confi
 	if err != nil {
 		return "", err
 	}
-	encodedCompose, err := compose.Create(s, e.Domain())
+	encodedCompose, err := compose.Create(s, e)
 	if err != nil {
 		return "", err
 	}
@@ -241,13 +241,14 @@ sudo docker run \
 	-e COMPOSE=%s \
 	-e CONFIG=%s \
 	-e UNIQUE_OPERATION_ID=%s \
+	-e INSTANCE_ID=$INSTANCE_ID \
 	-e STACK=%s \
 	-e REGION=%s \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	--log-driver=awslogs \
 	--log-opt awslogs-region=%s \
 	--log-opt awslogs-group=i2kit-%s \
-	--log-opt tag=$INSTANCE_ID \
+	--log-opt tag=i2kit-$INSTANCE_ID \
 	riberaproject/agent`,
 		containerName,
 		encodedCompose,
@@ -334,7 +335,7 @@ func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 			"Statement": map[string]interface{}{
 				"Effect":   "Allow",
 				"Action":   []string{"logs:CreateLogStream", "logs:PutLogEvents"},
-				"Resource": fmt.Sprintf("arn:aws:logs:%s:*:log-group:i2kit-%s:log-stream:i-*", e.Provider.Region, s.GetFullName(e, "-")),
+				"Resource": fmt.Sprintf("arn:aws:logs:%s:*:log-group:i2kit-%s:log-stream:*", e.Provider.Region, s.GetFullName(e, "-")),
 			},
 		},
 	}

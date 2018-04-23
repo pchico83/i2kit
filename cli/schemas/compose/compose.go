@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
 
 	yaml "gopkg.in/yaml.v2"
@@ -18,16 +19,24 @@ type Compose struct {
 //Service represents a service in a docker-compose.yml file
 type Service struct {
 	Image       string
-	Command     string    `yaml:"command,omitempty"`
-	Ports       []*string `yaml:"ports,omitempty"`
-	Environment []*string `yaml:"environment,omitempty"`
-	NetworkMode string    `yaml:"network_mode,omitempty"`
-	Restart     string    `yaml:"restart,omitempty"`
-	DNSSearch   []*string `yaml:"dns_search,omitempty"`
+	Command     string         `yaml:"command,omitempty"`
+	Ports       []*string      `yaml:"ports,omitempty"`
+	Environment []*string      `yaml:"environment,omitempty"`
+	NetworkMode string         `yaml:"network_mode,omitempty"`
+	Logging     *LoggingDriver `yaml:"logging,omitempty"`
+	Restart     string         `yaml:"restart,omitempty"`
+	DNSSearch   []*string      `yaml:"dns_search,omitempty"`
+}
+
+//LoggingDriver represents a docker logging driver
+type LoggingDriver struct {
+	Driver  string            `yaml:"driver,omitempty"`
+	Options map[string]string `yaml:"options,omitempty"`
 }
 
 //Create returns a compose base64 encoded given a service object
-func Create(s *service.Service, domain string) (string, error) {
+func Create(s *service.Service, e *environment.Environment) (string, error) {
+	domain := e.Domain()
 	compose := &Compose{
 		Version:  "3.4",
 		Services: make(map[string]*Service),
@@ -60,6 +69,14 @@ func Create(s *service.Service, domain string) (string, error) {
 				compose.Services[cName].Environment,
 				&composeEnvVar,
 			)
+		}
+		compose.Services[cName].Logging = &LoggingDriver{
+			Driver: "awslogs",
+			Options: map[string]string{
+				"awslogs-region": e.Provider.Region,
+				"awslogs-group":  fmt.Sprintf("i2kit-%s", s.GetFullName(e, "-")),
+				"tag":            fmt.Sprintf("%s-${INSTANCE_ID}", cName),
+			},
 		}
 	}
 	composeBytes, err := yaml.Marshal(compose)
