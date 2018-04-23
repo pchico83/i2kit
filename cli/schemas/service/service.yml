@@ -16,6 +16,7 @@ required:
           type: "//arr"
           contents: "//str"
 optional:
+  public: "//bool"
   stateful: "//bool"
   replicas: "//int"
   size: "//str"

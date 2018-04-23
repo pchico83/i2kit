@@ -1,5 +1,6 @@
 name: result
 replicas: 1
+public: true
 containers:
   results:
     image: docker/example-voting-app-result:latest
