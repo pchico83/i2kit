@@ -28,7 +28,6 @@ In the [`dockercloud.yml`](https://github.com/dockersamples/example-voting-app/b
 i2kit requires the following resources:
 - an access key and a secret key
 - a vpc with at least 1 subnet (we recommend 3)
-- a security group with port 22 exposed (for troubleshooting and service to service communication)
 - a keypair
 - a hosted zone registered in route53
 - An SSL certificate that matches your hosted zone's name (optional)
@@ -52,7 +51,6 @@ provider:
   subnets:
   - subnet-7c75725
   - subnet-7c75726
-  security_group: sg-dffe41a3
   keypair: development
   hosted_zone: example.com.
   size: t2.small
