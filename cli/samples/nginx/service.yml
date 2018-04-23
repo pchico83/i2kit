@@ -1,5 +1,6 @@
 name: test
 replicas: 2
+public: true
 containers:
   nginx:
     image: nginx:alpine
