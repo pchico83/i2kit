@@ -301,11 +301,10 @@ func loadELB(t *gocf.Template, s *service.Service, e *environment.Environment) e
 		crossZone = true
 	}
 	elb := &gocf.ElasticLoadBalancingLoadBalancer{
-		LoadBalancerName: gocf.String(s.GetFullName(e, "-")),
-		Subnets:          subnets,
-		Scheme:           gocf.String(schema),
-		CrossZone:        gocf.Bool(crossZone),
-		SecurityGroups:   securityGroups,
+		Subnets:        subnets,
+		Scheme:         gocf.String(schema),
+		CrossZone:      gocf.Bool(crossZone),
+		SecurityGroups: securityGroups,
 		HealthCheck: &gocf.ElasticLoadBalancingHealthCheck{
 			HealthyThreshold:   gocf.String("2"),
 			Interval:           gocf.String("15"),
