@@ -10,6 +10,8 @@ import (
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 )
 
+var groupNameFilter = "group-name"
+
 //CreateSG creates the project security group
 func CreateSG(e *environment.Environment, config *aws.Config) error {
 	vpc, err := GetVPC(e, config)
@@ -29,13 +31,16 @@ func CreateSG(e *environment.Environment, config *aws.Config) error {
 		if !strings.Contains(err.Error(), "InvalidGroup.Duplicate") {
 			return err
 		}
+
 		dsgi := &ec2.DescribeSecurityGroupsInput{
-			GroupNames: []*string{&name},
+			Filters: []*ec2.Filter{&ec2.Filter{Name: &groupNameFilter, Values: []*string{&name}}},
 		}
 		sgs, err2 := svc.DescribeSecurityGroups(dsgi)
+
 		if err2 != nil {
 			return err2
 		}
+
 		for _, i := range sgs.SecurityGroups {
 			if *i.VpcId == vpc {
 				e.Provider.SecurityGroup = *i.GroupId
@@ -54,7 +59,8 @@ func CreateSG(e *environment.Environment, config *aws.Config) error {
 		SourceSecurityGroupName: &name,
 	}
 	protocol := "-1"
-	if _, err = svc.AuthorizeSecurityGroupIngress(asgii); err != nil {
+	_, err = svc.AuthorizeSecurityGroupIngress(asgii)
+	if err != nil {
 		if strings.Contains(err.Error(), "InvalidParameterValue") {
 			asgii = &ec2.AuthorizeSecurityGroupIngressInput{
 				GroupId: &e.Provider.SecurityGroup,
@@ -72,6 +78,7 @@ func CreateSG(e *environment.Environment, config *aws.Config) error {
 			_, err = svc.AuthorizeSecurityGroupIngress(asgii)
 		}
 	}
+
 	if err != nil && !strings.Contains(err.Error(), "InvalidPermission.Duplicate") {
 		return err
 	}
