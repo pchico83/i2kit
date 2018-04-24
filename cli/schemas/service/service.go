@@ -11,20 +11,20 @@ var isAlphaNumeric = regexp.MustCompile(`^[A-Za-z0-9]+$`).MatchString
 
 //Service represents a service.yml file
 type Service struct {
-	Name         string
-	Replicas     int
-	Stateful     bool
-	Public       bool
-	InstanceType string
-	Containers   map[string]*Container
+	Name         string                `yaml:"name,omitempty"`
+	Replicas     int                   `yaml:"replicas,omitempty"`
+	Stateful     bool                  `yaml:"stateful,omitempty"`
+	Public       bool                  `yaml:"public,omitempty"`
+	InstanceType string                `yaml:"instance_type,omitempty"`
+	Containers   map[string]*Container `yaml:"containers,omitempty"`
 }
 
 //Container represents a container in a service.yml file
 type Container struct {
-	Image       string
-	Command     string
-	Ports       []*Port
-	Environment []*EnvVar
+	Image       string    `yaml:"image,omitempty"`
+	Command     string    `yaml:"command,omitempty"`
+	Ports       []*Port   `yaml:"ports,omitempty"`
+	Environment []*EnvVar `yaml:"environment,omitempty"`
 }
 
 //Port represents a container port

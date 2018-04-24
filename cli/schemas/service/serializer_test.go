@@ -51,7 +51,10 @@ func TestMarshalingService(t *testing.T) {
 func TestUnmarshalService(t *testing.T) {
 	y := []byte(`
 name: test
-replicas: 2
+replicas: 1
+stateful : true
+public: true
+instance_type: t2.small
 containers:
   nginx:
     image: nginx:alpine
@@ -62,8 +65,11 @@ containers:
       - foo=bar`)
 
 	expected := &Service{
-		Name:     "test",
-		Replicas: 2,
+		Name:         "test",
+		Replicas:     1,
+		Stateful:     true,
+		Public:       true,
+		InstanceType: "t2.small",
 		Containers: map[string]*Container{
 			"nginx": &Container{
 				Image:   "nginx:alpine",
