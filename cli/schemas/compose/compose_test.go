@@ -37,3 +37,31 @@ func TestEncodedCompose(t *testing.T) {
 		t.Fatal(string(decoded))
 	}
 }
+
+func Test_parsePorts(t *testing.T) {
+	tests := []struct {
+		name     string
+		stateful bool
+		ports    []*service.Port
+		expected []string
+	}{
+		{name: "single-http", stateful: false, ports: []*service.Port{&service.Port{Port: "80", InstancePort: "80"}}, expected: []string{"80:80"}},
+		{name: "single-https", stateful: false, ports: []*service.Port{&service.Port{Port: "443", InstancePort: "80"}}, expected: []string{"80:80"}},
+		{name: "single-stateful", stateful: true, ports: []*service.Port{&service.Port{Port: "54320", InstancePort: "5432"}}, expected: []string{"54320:5432"}},
+		{name: "duplicated", stateful: false, ports: []*service.Port{&service.Port{Port: "80", InstancePort: "80"}, &service.Port{Port: "80", InstancePort: "80"}, &service.Port{Port: "80", InstancePort: "80"}}, expected: []string{"80:80"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := parsePorts(tt.stateful, tt.ports)
+			if len(result) != len(tt.expected) {
+				t.Errorf("didn't got the expected results: %+v", result)
+				return
+			}
+			for i := range result {
+				if *result[i] != tt.expected[i] {
+					t.Errorf("parsePorts(): got %s; expected: %s", *result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}

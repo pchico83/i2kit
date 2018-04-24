@@ -51,18 +51,9 @@ func Create(s *service.Service, e *environment.Environment) (string, error) {
 			Restart:     "on-failure",
 			DNSSearch:   []*string{&domain},
 		}
-		for _, p := range c.Ports {
-			var composePort string
-			if s.Stateful {
-				composePort = fmt.Sprintf("%s:%s", p.Port, p.InstancePort)
-			} else {
-				composePort = fmt.Sprintf("%s:%s", p.InstancePort, p.InstancePort)
-			}
-			compose.Services[cName].Ports = append(
-				compose.Services[cName].Ports,
-				&composePort,
-			)
-		}
+
+		compose.Services[cName].Ports = parsePorts(s.Stateful, c.Ports)
+
 		for _, e := range c.Environment {
 			composeEnvVar := fmt.Sprintf("%s=%s", e.Name, e.Value)
 			compose.Services[cName].Environment = append(
@@ -85,4 +76,34 @@ func Create(s *service.Service, e *environment.Environment) (string, error) {
 	}
 	composeEncoded := base64.StdEncoding.EncodeToString(composeBytes)
 	return composeEncoded, nil
+}
+
+func parsePorts(stateful bool, ports []*service.Port) []*string {
+	parsedPorts := make([]*string, 0)
+
+	for _, p := range ports {
+		var composePort string
+		if stateful {
+			composePort = fmt.Sprintf("%s:%s", p.Port, p.InstancePort)
+		} else {
+			composePort = fmt.Sprintf("%s:%s", p.InstancePort, p.InstancePort)
+		}
+		parsedPorts = append(parsedPorts, &composePort)
+	}
+
+	removeDuplicates(&parsedPorts)
+	return parsedPorts
+}
+
+func removeDuplicates(xs *[]*string) {
+	found := make(map[string]bool)
+	j := 0
+	for i, x := range *xs {
+		if !found[*x] {
+			found[*x] = true
+			(*xs)[j] = (*xs)[i]
+			j++
+		}
+	}
+	*xs = (*xs)[:j]
 }
