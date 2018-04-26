@@ -36,7 +36,7 @@ func update(s *service.Service, e *environment.Environment, target, action strin
 								Value: aws.String(target),
 							},
 						},
-						TTL: aws.Int64(900),
+						TTL: aws.Int64(60),
 					},
 				},
 			},

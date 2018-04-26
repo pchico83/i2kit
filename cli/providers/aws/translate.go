@@ -379,7 +379,7 @@ func loadRoute53(t *gocf.Template, s *service.Service, e *environment.Environmen
 		HostedZoneName:  gocf.String(e.Provider.HostedZone),
 		Name:            gocf.String(recordName),
 		Type:            gocf.String("CNAME"),
-		TTL:             gocf.String("900"),
+		TTL:             gocf.String("60"),
 		ResourceRecords: resourceRecords,
 	}
 	resourceSetResource := &gocf.Resource{
