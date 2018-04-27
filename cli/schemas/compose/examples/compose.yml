@@ -7,7 +7,6 @@ services:
     - 80:80
     environment:
     - NAME=VALUE
-    network_mode: bridge
     logging:
       driver: awslogs
       options:
