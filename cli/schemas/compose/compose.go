@@ -22,7 +22,6 @@ type Service struct {
 	Command     string         `yaml:"command,omitempty"`
 	Ports       []*string      `yaml:"ports,omitempty"`
 	Environment []*string      `yaml:"environment,omitempty"`
-	NetworkMode string         `yaml:"network_mode,omitempty"`
 	Logging     *LoggingDriver `yaml:"logging,omitempty"`
 	Restart     string         `yaml:"restart,omitempty"`
 	DNSSearch   []*string      `yaml:"dns_search,omitempty"`
@@ -47,7 +46,6 @@ func Create(s *service.Service, e *environment.Environment) (string, error) {
 			Command:     c.Command,
 			Ports:       []*string{},
 			Environment: []*string{},
-			NetworkMode: "bridge",
 			Restart:     "on-failure",
 			DNSSearch:   []*string{&domain},
 		}
