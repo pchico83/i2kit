@@ -9,9 +9,6 @@ import:
   - aws/session
   - service/cloudformation
 - package: github.com/crewjam/go-cloudformation
-- package: github.com/moby/tool
-  subpackages:
-  - src/moby
 - package: github.com/sirupsen/logrus
 - package: github.com/spf13/cobra
 - package: gopkg.in/yaml.v2
@@ -21,6 +18,10 @@ import:
 - package: k8s.io/apimachinery
   subpackages:
   - pkg/util/yaml
+- package: github.com/ghodss/yaml
+  version: ^1.0.0
+- package: github.com/spf13/pflag
+  version: ^1.0.1
 testImport:
 - package: github.com/stretchr/testify
   subpackages:

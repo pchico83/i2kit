@@ -1,5 +1,5 @@
-hash: 081f99d4fd9803afa9de4f534fa2c7c4bf10d1e2c2027b395f2de120154cee2a
-updated: 2018-04-06T18:46:49.124587762+02:00
+hash: 28424966a5f0ef24ed1cada7465c35d2912e569a904b87e45da8eae4d5fd8447
+updated: 2018-05-15T12:02:31.298489-07:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: b80dd2206c8eba8afd8930df003d126a7905d2d2
@@ -44,7 +44,7 @@ imports:
   subpackages:
   - log
 - name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-ini/ini
   version: 32e4be5f41bb918afb6e37c07426e2ddbcb6647e
 - name: github.com/go-openapi/jsonpointer
@@ -104,10 +104,6 @@ imports:
   - buffer
   - jlexer
   - jwriter
-- name: github.com/moby/tool
-  version: 830794f3c07d172aba29b9333248ad05b27a1267
-  subpackages:
-  - src/moby
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/PuerkitoBio/purell
@@ -119,7 +115,7 @@ imports:
 - name: github.com/spf13/cobra
   version: be77323fc05148ef091e83b3866c0d47c8e74a8b
 - name: github.com/spf13/pflag
-  version: 6a877ebacf28c5fc79846f4fcd380a5d9872b997
+  version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - name: golang.org/x/crypto
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
