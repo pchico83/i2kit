@@ -10,7 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	gocf "github.com/crewjam/go-cloudformation"
-	"github.com/google/uuid"
 	"github.com/pchico83/i2kit/cli/providers/aws/ec2"
 	"github.com/pchico83/i2kit/cli/schemas/compose"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
@@ -230,7 +229,6 @@ func loadASG(t *gocf.Template, s *service.Service, e *environment.Environment, a
 }
 
 func userData(containerName, encodedCompose string, e *environment.Environment) string {
-	uniqueOperationID := uuid.New().String()
 	value := fmt.Sprintf(
 		`#!/bin/bash
 
@@ -240,7 +238,6 @@ sudo docker run \
 	--name %s \
 	-e COMPOSE=%s \
 	-e CONFIG=%s \
-	-e UNIQUE_OPERATION_ID=%s \
 	-e INSTANCE_ID=$INSTANCE_ID \
 	-e STACK=%s \
 	-e REGION=%s \
@@ -253,7 +250,6 @@ sudo docker run \
 		containerName,
 		encodedCompose,
 		e.B64DockerConfig(),
-		uniqueOperationID,
 		containerName,
 		e.Provider.Region,
 		e.Provider.Region,
