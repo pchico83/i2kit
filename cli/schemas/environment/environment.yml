@@ -12,6 +12,7 @@ optional:
       subnets:
         type: "//arr"
         contents: "//str"
+      security_group: "//str"
       keypair: "//str"
       hosted_zone: "//str"
     optional:
