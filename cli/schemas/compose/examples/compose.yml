@@ -6,7 +6,8 @@ services:
     ports:
     - 80:80
     environment:
-    - NAME=VALUE
+    - NAME=VALUE1
+    - SECRET=VALUE2
     logging:
       driver: awslogs
       options:

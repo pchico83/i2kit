@@ -30,6 +30,7 @@ type Environment struct {
 	DNSProvider *DNSProvider `yaml:"dns,omitempty"`
 	Provider    *Provider    `yaml:"provider,omitempty"`
 	Docker      *Docker      `yaml:"docker,omitempty"`
+	Secrets     []*Secret    `yaml:"secrets,omitempty"`
 }
 
 //DNSProvider represents the info for the cloud provider where the DNS is created
@@ -59,6 +60,12 @@ type Provider struct {
 type Docker struct {
 	Username string `yaml:"username,omitempty"`
 	Password string `yaml:"password,omitempty"`
+}
+
+//Secret represents a container secret
+type Secret struct {
+	Name  string
+	Value string
 }
 
 //Validate returns an error for invalid environment.yml files
