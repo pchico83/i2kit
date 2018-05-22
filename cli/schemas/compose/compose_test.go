@@ -25,6 +25,9 @@ func TestEncodedCompose(t *testing.T) {
 			Region:     "us-west-2",
 			HostedZone: "i2kit.com.",
 		},
+		Secrets: []*environment.Secret{
+			&environment.Secret{Name: "SECRET", Value: "VALUE2"},
+		},
 	}
 	generatedEncodedCompose, err := Create(&s, e)
 	require.NoError(t, err)

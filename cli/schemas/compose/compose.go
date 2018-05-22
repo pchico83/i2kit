@@ -52,8 +52,15 @@ func Create(s *service.Service, e *environment.Environment) (string, error) {
 
 		compose.Services[cName].Ports = parsePorts(s.Stateful, c.Ports)
 
-		for _, e := range c.Environment {
-			composeEnvVar := fmt.Sprintf("%s=%s", e.Name, e.Value)
+		for _, env := range c.Environment {
+			if env.Value == "" {
+				for _, secret := range e.Secrets {
+					if env.Name == secret.Name {
+						env.Value = secret.Value
+					}
+				}
+			}
+			composeEnvVar := fmt.Sprintf("%s=%s", env.Name, env.Value)
 			compose.Services[cName].Environment = append(
 				compose.Services[cName].Environment,
 				&composeEnvVar,
