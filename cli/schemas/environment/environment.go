@@ -152,6 +152,9 @@ func (p *Provider) Validate() error {
 		if p.Subnets == nil || len(p.Subnets) == 0 {
 			return fmt.Errorf("'provider.subnets' cannot be empty")
 		}
+		if p.SecurityGroup == "" {
+			return fmt.Errorf("'provider.security_group' cannot be empty")
+		}
 		if p.Keypair == "" {
 			return fmt.Errorf("'provider.keypair' cannot be empty")
 		}
