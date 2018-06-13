@@ -246,7 +246,7 @@ sudo docker run \
 	--log-opt awslogs-region=%s \
 	--log-opt awslogs-group=i2kit-%s \
 	--log-opt tag=i2kit-$INSTANCE_ID \
-	riberaproject/agent`,
+	okteto/agent:1.0`,
 		containerName,
 		encodedCompose,
 		e.B64DockerConfig(),
