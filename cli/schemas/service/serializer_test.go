@@ -49,9 +49,14 @@ func TestMarshalingService(t *testing.T) {
 }
 
 func TestUnmarshalService(t *testing.T) {
-	y := []byte(`
+	var tests = []struct {
+		raw      []byte
+		expected *Service
+	}{
+		{
+			raw: []byte(`
 name: test
-replicas: 1
+replicas: 2
 stateful : true
 public: true
 instance_type: t2.small
@@ -60,46 +65,91 @@ containers:
     image: nginx:alpine
     command: run
     ports:
-      - http:80:http:80
+    - http:80:http:80
     environment:
-      - foo=bar`)
-
-	expected := &Service{
-		Name:         "test",
-		Replicas:     1,
-		Stateful:     true,
-		Public:       true,
-		InstanceType: "t2.small",
-		Containers: map[string]*Container{
-			"nginx": &Container{
-				Image:   "nginx:alpine",
-				Command: "run",
-				Environment: []*EnvVar{
-					{
-						Name:  "foo",
-						Value: "bar",
+    - foo=bar`),
+			expected: &Service{
+				Name:         "test",
+				Replicas:     2,
+				Stateful:     true,
+				Public:       true,
+				InstanceType: "t2.small",
+				Containers: map[string]*Container{
+					"nginx": &Container{
+						Image:   "nginx:alpine",
+						Command: "run",
+						Environment: []*EnvVar{
+							{
+								Name:  "foo",
+								Value: "bar",
+							},
+						},
+						Ports: []*Port{
+							{Certificate: "",
+								Protocol:         "HTTP",
+								InstanceProtocol: "HTTP",
+								Port:             "80",
+								InstancePort:     "80",
+							},
+						},
 					},
 				},
-				Ports: []*Port{
-					{Certificate: "",
-						Protocol:         "HTTP",
-						InstanceProtocol: "HTTP",
-						Port:             "80",
-						InstancePort:     "80",
+			},
+		},
+		{
+			raw: []byte(`
+name: test
+stateful : true
+public: true
+instance_type: t2.small
+containers:
+  nginx:
+    image: nginx:alpine
+    command: run
+    ports:
+    - http:80:http:80
+    environment:
+    - foo=bar`),
+			expected: &Service{
+				Name:         "test",
+				Replicas:     1,
+				Stateful:     true,
+				Public:       true,
+				InstanceType: "t2.small",
+				Containers: map[string]*Container{
+					"nginx": &Container{
+						Image:   "nginx:alpine",
+						Command: "run",
+						Environment: []*EnvVar{
+							{
+								Name:  "foo",
+								Value: "bar",
+							},
+						},
+						Ports: []*Port{
+							{Certificate: "",
+								Protocol:         "HTTP",
+								InstanceProtocol: "HTTP",
+								Port:             "80",
+								InstancePort:     "80",
+							},
+						},
 					},
 				},
 			},
 		},
 	}
 
-	var s Service
-	err := yaml.Unmarshal(y, &s)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	for _, tt := range tests {
+		var s Service
+		err := yaml.Unmarshal(tt.raw, &s)
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
 
-	if !reflect.DeepEqual(&s, expected) {
-		t.Errorf("Expected: %+v \n Received: %+v", expected, &s)
+		if !reflect.DeepEqual(&s, tt.expected) {
+			t.Errorf("Expected: %+v \n Received: %+v", tt.expected, &s)
+		}
 	}
 
 }
