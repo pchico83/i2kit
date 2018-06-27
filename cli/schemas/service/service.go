@@ -42,6 +42,19 @@ type EnvVar struct {
 	Value string
 }
 
+//UnmarshalYAML sets the default value of replica to 1
+func (s *Service) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type rawService Service
+	raw := rawService{}
+	raw.Replicas = 1
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+
+	*s = Service(raw)
+	return nil
+}
+
 //Validate returns an error for invalid service.yml files
 func (s *Service) Validate() error {
 	if s.Name == "" {
