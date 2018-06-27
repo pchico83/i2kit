@@ -1,7 +1,7 @@
 version: "3"
 services:
   userdata:
-    image: riberaproject/userdata
+    image: okteto/userdata
     build: .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

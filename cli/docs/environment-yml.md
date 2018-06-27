@@ -11,7 +11,7 @@ users:
 - user2@gmail.com
 - user3@gmail.com
 docker:
-  username: ribera
+  username: okteto
   password: password
 provider:
   type: aws
@@ -59,7 +59,7 @@ Docker credentials to access your docker images in Docker Hub. It is composed of
 Your Docker Hub username, also known as Docker ID.
 
 ```yaml
-username: ribera
+username: okteto
 ```
 
 ### password (required)
@@ -84,9 +84,9 @@ type: aws
 
 ### access_key and secret_key (required)
 
-AWS credentials used by Ribera to manage resources in your AWS account.
+AWS credentials used by Okteto to manage resources in your AWS account.
 
-Ribera needs the following policies to create services in your account: `AmazonEC2FullAccess`, `CloudWatchLogsReadOnlyAccess`, `AmazonRoute53FullAccess` and `CloudFormationPolicy`.
+Okteto needs the following policies to create services in your account: `AmazonEC2FullAccess`, `CloudWatchLogsReadOnlyAccess`, `AmazonRoute53FullAccess` and `CloudFormationPolicy`.
 
 ```yaml
 access_key: AKIAI2K5O4A7QON6YSEA
@@ -135,7 +135,7 @@ instance_type: m3.medium
 
 In order to define `HTTPS`/`SSL` endpoints in your services, you will need to specify a hosted zone and an AWS certificate.
 
-The hosted zone is used to create your service DNS entries, instead of using `riberaproject.net.`.
+The hosted zone is used to create your service DNS entries, instead of using `okteto.net.`.
 
 The `certificate` will be attached to each `HTTPS`/`SSL` port defined by your services.
 

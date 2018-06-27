@@ -1,7 +1,7 @@
 version: "3"
 services:
   cli:
-    image: riberaproject/cli
+    image: okteto/cli
     build: .
     environment:
       - AWS_ACCESS_KEY_ID

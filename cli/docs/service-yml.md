@@ -30,7 +30,7 @@ The name of the service. Every service on the same project will be able to ping 
 name: api
 ```
 
-Also, a global DNS entry is created for this service. For example, if a service is named *api* and it belongs to the project *staging*, the DNS *api.staging.riberaproject.net* resolves to the service endpoint.
+Also, a global DNS entry is created for this service. For example, if a service is named *api* and it belongs to the project *staging*, the DNS *api.staging.okteto.net* resolves to the service endpoint.
 
 Service names should be unique per project.
 
@@ -103,7 +103,7 @@ environment:
 Overrides the default command in the container image.
 
 ```yaml
-command: echo 'Hello Ribera!'
+command: echo 'Hello Okteto!'
 ```
 
 ### ports (optional)
