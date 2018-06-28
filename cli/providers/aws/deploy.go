@@ -1,8 +1,8 @@
 package aws
 
 import (
+	"fmt"
 	logger "log"
-	"strings"
 
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
@@ -19,12 +19,16 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	if err != nil {
 		return err
 	}
-	if stack != nil && (*stack.StackStatus == "ROLLBACK_COMPLETE" || strings.HasSuffix(*stack.StackStatus, "_FAILED")) {
+	if stack != nil && (*stack.StackStatus == "CREATE_FAILED" || *stack.StackStatus == "DELETE_FAILED" || *stack.StackStatus == "ROLLBACK_COMPLETE" || *stack.StackStatus == "ROLLBACK_FAILED") {
 		if err = Destroy(s, e, log); err != nil {
 			return err
 		}
 		log.Printf("Destroying previous stack '%s' in '%s' state...", stackName, *stack.StackStatus)
 		stack = nil
+	}
+	if stack != nil && *stack.StackStatus == "UPDATE_ROLLBACK_FAILED" {
+		log.Printf("Stack %s is in 'UPDATE_ROLLBACK_FAILED' state. Fix the stack in the AWS console or destroy this service to unlock it.", stackName)
+		return fmt.Errorf("'UPDATE_ROLLBACK_FAILED' state")
 	}
 
 	var stackID string
