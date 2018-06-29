@@ -10,7 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	gocf "github.com/crewjam/go-cloudformation"
-	"github.com/google/uuid"
 	"github.com/pchico83/i2kit/cli/providers/aws/ec2"
 	"github.com/pchico83/i2kit/cli/schemas/compose"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
@@ -355,13 +354,13 @@ func loadIAM(t *gocf.Template, s *service.Service, e *environment.Environment) {
 }
 
 func loadLogGroup(t *gocf.Template, s *service.Service, e *environment.Environment) {
-	randomID := uuid.New()
+	// randomID := uuid.New()
 	logGroupResource := &gocf.Resource{
 		Properties: &gocf.LogsLogGroup{
-			LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s-%d", s.GetFullName(e, "-"), randomID.ID())),
+			LogGroupName:    gocf.String(fmt.Sprintf("i2kit-%s", s.GetFullName(e, "-"))),
 			RetentionInDays: gocf.Integer(30),
 		},
-		DeletionPolicy: "Retain",
+		// DeletionPolicy: "Retain",
 	}
 	t.Resources["LogGroup"] = logGroupResource
 }
