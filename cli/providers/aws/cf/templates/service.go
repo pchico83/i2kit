@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	gocf "github.com/crewjam/go-cloudformation"
-	"github.com/pchico83/i2kit/cli/providers/aws/ec2"
 	"github.com/pchico83/i2kit/cli/schemas/compose"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
@@ -32,25 +31,22 @@ var amisPerRegion = map[string]string{
 
 // Service translates an i2kit service to a AWS CloudFormation template
 func Service(s *service.Service, e *environment.Environment, config *aws.Config) (string, error) {
+	t := gocf.NewTemplate()
 	ami, ok := amisPerRegion[e.Provider.Region]
 	if !ok {
 		return "", fmt.Errorf("Region'%s' is not supported", e.Provider.Region)
 	}
-	t := gocf.NewTemplate()
-	vpc, err := ec2.GetVPC(e, config)
-	if err != nil {
-		return "", err
-	}
+	e.Provider.Ami = ami
 	encodedCompose, err := compose.Create(s, e)
 	if err != nil {
 		return "", err
 	}
 	if s.Stateful {
-		if err = stateful(t, s, e, ami, vpc, encodedCompose); err != nil {
+		if err = stateful(t, s, e, encodedCompose); err != nil {
 			return "", err
 		}
 	} else {
-		if err = stateless(t, s, e, ami, vpc, encodedCompose); err != nil {
+		if err = stateless(t, s, e, encodedCompose); err != nil {
 			return "", err
 		}
 	}

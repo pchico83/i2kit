@@ -9,8 +9,8 @@ import (
 	"github.com/pchico83/i2kit/cli/schemas/service"
 )
 
-func stateless(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
-	if err := asg(t, s, e, ami, vpc, encodedCompose); err != nil {
+func stateless(t *gocf.Template, s *service.Service, e *environment.Environment, encodedCompose string) error {
+	if err := asg(t, s, e, encodedCompose); err != nil {
 		return err
 	}
 	if len(s.GetPorts()) == 0 {
@@ -19,7 +19,7 @@ func stateless(t *gocf.Template, s *service.Service, e *environment.Environment,
 	return elb(t, s, e)
 }
 
-func asg(t *gocf.Template, s *service.Service, e *environment.Environment, ami, vpc, encodedCompose string) error {
+func asg(t *gocf.Template, s *service.Service, e *environment.Environment, encodedCompose string) error {
 	securityGroups := []gocf.Stringable{gocf.String(e.Provider.SecurityGroup)}
 	loadBalancerNames := gocf.StringList()
 	instanceIngressRules := gocf.EC2SecurityGroupRuleList{}
@@ -49,14 +49,14 @@ func asg(t *gocf.Template, s *service.Service, e *environment.Environment, ami, 
 			securityGroup := &gocf.EC2SecurityGroup{
 				GroupDescription:     gocf.String(fmt.Sprintf("Instance Security Group for %s", s.GetFullName(e, "-"))),
 				SecurityGroupIngress: &instanceIngressRules,
-				VpcId:                gocf.String(vpc),
+				VpcId:                gocf.String(e.Provider.VPC),
 			}
 			t.AddResource("InstanceSecurityGroup", securityGroup)
 			securityGroups = append(securityGroups, gocf.Ref("InstanceSecurityGroup").String())
 			securityGroup = &gocf.EC2SecurityGroup{
 				GroupDescription:     gocf.String(fmt.Sprintf("ELB Security Group for %s", s.GetFullName(e, "-"))),
 				SecurityGroupIngress: &loadbalancerIngressRules,
-				VpcId:                gocf.String(vpc),
+				VpcId:                gocf.String(e.Provider.VPC),
 			}
 			t.AddResource("ELBSecurityGroup", securityGroup)
 		}
@@ -104,7 +104,7 @@ func asg(t *gocf.Template, s *service.Service, e *environment.Environment, ami, 
 	t.Resources["ASG"] = asgResource
 
 	launchConfig := &gocf.AutoScalingLaunchConfiguration{
-		ImageId:            gocf.String(ami),
+		ImageId:            gocf.String(e.Provider.Ami),
 		InstanceType:       gocf.String(s.GetInstanceType(e)),
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     securityGroups,
