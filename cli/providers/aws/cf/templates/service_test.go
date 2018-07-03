@@ -1,4 +1,4 @@
-package aws
+package templates
 
 import (
 	"encoding/json"

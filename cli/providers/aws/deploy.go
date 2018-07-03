@@ -5,6 +5,7 @@ import (
 	logger "log"
 
 	"github.com/pchico83/i2kit/cli/providers/aws/cf"
+	"github.com/pchico83/i2kit/cli/providers/aws/cf/templates"
 	"github.com/pchico83/i2kit/cli/providers/aws/elb"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 	"github.com/pchico83/i2kit/cli/schemas/service"
@@ -34,7 +35,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 	var stackID string
 	var template string
 	if stack == nil {
-		template, err = Translate(s, e, config)
+		template, err = templates.Service(s, e, config)
 		if err != nil {
 			return err
 		}
@@ -43,7 +44,7 @@ func Deploy(s *service.Service, e *environment.Environment, log *logger.Logger) 
 			return err
 		}
 	} else {
-		template, err = Translate(s, e, config)
+		template, err = templates.Service(s, e, config)
 		if err != nil {
 			return err
 		}
