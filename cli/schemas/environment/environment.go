@@ -49,6 +49,8 @@ type Provider struct {
 	AccessKey     string    `yaml:"access_key,omitempty"`
 	SecretKey     string    `yaml:"secret_key,omitempty"`
 	Region        string    `yaml:"region,omitempty"`
+	Ami           string    `yaml:"ami,omitempty"`
+	VPC           string    `yaml:"vpc,omitempty"`
 	Subnets       []*string `yaml:"subnets,omitempty"`
 	SecurityGroup string    `yaml:"security_group,omitempty"`
 	Keypair       string    `yaml:"keypair,omitempty"`
@@ -148,15 +150,6 @@ func (p *Provider) Validate() error {
 		}
 		if p.Region == "" {
 			return fmt.Errorf("'provider.region' cannot be empty")
-		}
-		if p.Subnets == nil || len(p.Subnets) == 0 {
-			return fmt.Errorf("'provider.subnets' cannot be empty")
-		}
-		if p.SecurityGroup == "" {
-			return fmt.Errorf("'provider.security_group' cannot be empty")
-		}
-		if p.Keypair == "" {
-			return fmt.Errorf("'provider.keypair' cannot be empty")
 		}
 		return nil
 	case K8:

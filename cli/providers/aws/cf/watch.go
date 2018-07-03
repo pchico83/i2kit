@@ -59,7 +59,7 @@ func Watch(name string, consumed int, s *service.Service, e *environment.Environ
 			}
 			consumed = len(events.StackEvents)
 		}
-		if *startTime != -1 {
+		if *startTime != -1 && s != nil {
 			if err := cloudwatch.RetrieveLogs(s, e, startTime, config, log); err != nil {
 				return err
 			}
