@@ -108,7 +108,7 @@ func asg(t *gocf.Template, s *service.Service, e *environment.Environment, encod
 		InstanceType:       gocf.String(s.GetInstanceType(e)),
 		KeyName:            gocf.String(e.Provider.Keypair),
 		SecurityGroups:     securityGroups,
-		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
+		IamInstanceProfile: gocf.String(e.Provider.InstanceProfile),
 		UserData:           gocf.String(userData(s.GetFullName(e, "-"), encodedCompose, e)),
 	}
 	t.AddResource("LaunchConfig", launchConfig)

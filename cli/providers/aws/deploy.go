@@ -87,8 +87,11 @@ func deployVPC(e *environment.Environment, log *logger.Logger) error {
 	for _, subnet := range strings.Split(subnets, ",") {
 		e.Provider.Subnets = append(e.Provider.Subnets, &subnet)
 	}
-	securtyGroup, _ := cf.GetOutput(stackName, "SecurityGroup", config)
-	e.Provider.SecurityGroup = securtyGroup
+	securityGroup, _ := cf.GetOutput(stackName, "SecurityGroup", config)
+	e.Provider.SecurityGroup = securityGroup
+
+	instanceProfile, _ := cf.GetOutput(stackName, "InstanceProfile", config)
+	e.Provider.InstanceProfile = instanceProfile
 
 	if e.Provider.Keypair == "" {
 		if err := ec2.CreateKeypair(e, config); err != nil {

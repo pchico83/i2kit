@@ -42,19 +42,20 @@ type DNSProvider struct {
 
 //Provider represents the info for the cloud provider where the deployment takes place
 type Provider struct {
-	Type          string    `yaml:"type,omitempty"`
-	Config        string    `yaml:"config,omitempty"`
-	InstanceType  string    `yaml:"instance_type,omitempty"`
-	Certificate   string    `yaml:"certificate,omitempty"`
-	AccessKey     string    `yaml:"access_key,omitempty"`
-	SecretKey     string    `yaml:"secret_key,omitempty"`
-	Region        string    `yaml:"region,omitempty"`
-	Ami           string    `yaml:"ami,omitempty"`
-	VPC           string    `yaml:"vpc,omitempty"`
-	Subnets       []*string `yaml:"subnets,omitempty"`
-	SecurityGroup string    `yaml:"security_group,omitempty"`
-	Keypair       string    `yaml:"keypair,omitempty"`
-	HostedZone    string    `yaml:"hosted_zone,omitempty"`
+	Type            string    `yaml:"type,omitempty"`
+	Config          string    `yaml:"config,omitempty"`
+	Ami             string    `yaml:"ami,omitempty"`
+	InstanceType    string    `yaml:"instance_type,omitempty"`
+	Certificate     string    `yaml:"certificate,omitempty"`
+	AccessKey       string    `yaml:"access_key,omitempty"`
+	SecretKey       string    `yaml:"secret_key,omitempty"`
+	Region          string    `yaml:"region,omitempty"`
+	InstanceProfile string    `yaml:"instance_profile,omitempty"`
+	VPC             string    `yaml:"vpc,omitempty"`
+	Subnets         []*string `yaml:"subnets,omitempty"`
+	SecurityGroup   string    `yaml:"security_group,omitempty"`
+	Keypair         string    `yaml:"keypair,omitempty"`
+	HostedZone      string    `yaml:"hosted_zone,omitempty"`
 }
 
 //Docker represents Docker Hub credentials
