@@ -4,10 +4,12 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/pchico83/i2kit/cli/schemas/environment"
 )
 
 func userData(containerName, encodedCompose string, e *environment.Environment) string {
+	uniqueOperationID := uuid.New().String()
 	value := fmt.Sprintf(
 		`#!/bin/bash
 
@@ -17,6 +19,7 @@ sudo docker run \
 	--name %s \
 	-e COMPOSE=%s \
 	-e CONFIG=%s \
+	-e UNIQUE_OPERATION_ID=%s \
 	-e INSTANCE_ID=$INSTANCE_ID \
 	-e STACK=%s \
 	-e REGION=%s \
@@ -29,6 +32,7 @@ sudo docker run \
 		containerName,
 		encodedCompose,
 		e.B64DockerConfig(),
+		uniqueOperationID,
 		containerName,
 		e.Provider.Region,
 		e.Provider.Region,
