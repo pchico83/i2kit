@@ -68,7 +68,24 @@ func VPC(e *environment.Environment, config *aws.Config) (string, error) {
 		GroupDescription: gocf.String(fmt.Sprintf("Security Group for internal traffic in project %s", e.Name)),
 		VpcId:            gocf.Ref("VPC").String(),
 	}
+	if e.Provider.Keypair != "" {
+		sg.SecurityGroupIngress = &gocf.EC2SecurityGroupRuleList{
+			gocf.EC2SecurityGroupRule{
+				IpProtocol: gocf.String("tcp"),
+				CidrIp:     gocf.String("0.0.0.0/0"),
+				FromPort:   gocf.Integer(22),
+				ToPort:     gocf.Integer(22),
+			},
+		}
+	}
 	t.AddResource("SecurityGroup", sg)
+
+	sgi := &gocf.EC2SecurityGroupIngress{
+		GroupId:               gocf.Ref("SecurityGroup").String(),
+		IpProtocol:            gocf.String("-1"),
+		SourceSecurityGroupId: gocf.Ref("SecurityGroup").String(),
+	}
+	t.AddResource("SecurityGroupIngress", sgi)
 
 	t.Outputs["VPC"] = &gocf.Output{
 		Description: "VPC id",
