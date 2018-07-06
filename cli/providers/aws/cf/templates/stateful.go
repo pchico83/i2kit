@@ -22,7 +22,7 @@ func stateful(t *gocf.Template, s *service.Service, e *environment.Environment, 
 	}
 
 	ec2Instance := &gocf.EC2Instance{
-		IamInstanceProfile: gocf.Ref("InstanceProfile").String(),
+		IamInstanceProfile: gocf.String(e.Provider.InstanceProfile),
 		ImageId:            gocf.String(e.Provider.Ami),
 		InstanceType:       gocf.String(s.GetInstanceType(e)),
 		KeyName:            gocf.String(e.Provider.Keypair),

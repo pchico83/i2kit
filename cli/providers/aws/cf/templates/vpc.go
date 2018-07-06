@@ -14,6 +14,8 @@ import (
 func VPC(e *environment.Environment, config *aws.Config) (string, error) {
 	t := gocf.NewTemplate()
 
+	logGroupIAM(t, e)
+
 	vpc := &gocf.EC2VPC{
 		CidrBlock:          gocf.String("10.192.0.0/16"),
 		EnableDnsSupport:   gocf.Bool(true),
