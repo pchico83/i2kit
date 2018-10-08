@@ -1,6 +1,6 @@
 # i2kit
 
-The simplicity of containers, the confidence of virtual machines.
+The simplicity of containers, the security of virtual machines.
 
 *i2kit* combines the simplicity of containers to develop your applications with the security and robustness of virtual machines for production environments at scale.
 
